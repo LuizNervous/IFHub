@@ -1,0 +1,57 @@
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-height));
+  padding: 80px 24px;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* ===== Camada 1: grade tecnológica ===== */
+/* O background-size (56px) precisa ser igual ao CELL do GridGlow.jsx */
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+}
+
+/* ===== Camada 3: conteúdo ===== */
+.hero__content {
+  position: relative; /* fica acima da grade e do canvas */
+  max-width: 760px;
+}
+
+.hero__title {
+  margin: 0;
+  font-size: clamp(4rem, 14vw, 8.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.hero__title-accent {
+  color: var(--color-teal);
+}
+
+.hero__subtitle {
+  margin: 24px auto 0;
+  max-width: 700px; /* era 560px: evita "Informática" sozinha na linha */
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: var(--color-muted);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 40px;
+}

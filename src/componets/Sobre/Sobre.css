@@ -1,0 +1,673 @@
+.sobre {
+  padding: 96px 24px;
+  background: var(--color-black);
+  border-top: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.sobre__container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.sobre__header {
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.sobre__eyebrow {
+  margin: 0 0 12px;
+  font-size:1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+}
+
+.sobre__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* ===================================================
+   O LIVRO
+   =================================================== */
+
+/* A "capa": uma moldura em volta das páginas */
+.book-wrap {
+  padding: 14px;
+  background: var(--color-navy-soft);
+  border: 1px solid color-mix(in srgb, var(--color-teal) 30%, transparent);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* perspective vai no PAI das folhas: é ela que cria a profundidade 3D */
+.book {
+  position: relative;
+  height: 600px;
+  perspective: 2400px;
+}
+
+/* Páginas fixas: cada uma ocupa metade do livro */
+.book__half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+}
+
+.book__half--left {
+  left: 0;
+}
+
+.book__half--right {
+  right: 0;
+}
+
+/* Sombra da lombada, por cima de tudo, sem bloquear cliques */
+.book::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 22px);
+  width: 44px;
+  z-index: 20;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(0, 0, 0, 0.45) 50%,
+    transparent
+  );
+}
+
+/* ===== A folha: gira em torno da lombada ===== */
+.leaf {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  transform-origin: left center;   /* o eixo de giro é a borda esquerda = lombada */
+  transform-style: preserve-3d;    /* frente e verso existem em 3D */
+  transition:
+    transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1),
+    z-index 0s 0.45s;              /* troca o empilhamento no meio do giro */
+}
+
+.leaf.is-flipped {
+  transform: rotateY(-180deg);
+}
+
+/* Microinteração: ao passar o mouse nos botões, a folha "espia".
+   :has() permite estilizar a seção com base no que está dentro dela. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sobre:has(.sobre__nav--next:hover:not(:disabled)) .leaf.is-next {
+    transform: rotateY(-14deg);
+  }
+
+  .sobre:has(.sobre__nav--prev:hover:not(:disabled)) .leaf.is-prev {
+    transform: rotateY(-166deg);
+  }
+}
+
+/* ===== A página (papel) ===== */
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 44px 44px 56px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  color: var(--color-white);
+  /* um único brilho discreto no canto, no tom da identidade */
+  background:
+    radial-gradient(circle at 100% 0, rgba(20, 184, 166, 0.07), transparent 55%),
+    var(--color-navy);
+  border: 1px solid var(--color-border);
+  /* esconde o lado de trás: assim só vemos a face voltada para nós */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* O sombreado perto da lombada dá a curvatura do papel */
+.page--left {
+  border-right: none;
+  border-radius: 14px 0 0 14px;
+  box-shadow: inset -36px 0 36px -36px rgba(0, 0, 0, 0.7);
+}
+
+.page--right {
+  border-left: none;
+  border-radius: 0 14px 14px 0;
+  box-shadow: inset 36px 0 36px -36px rgba(0, 0, 0, 0.7);
+}
+
+/* O verso da folha já nasce virado: ao girar a folha, ele fica de frente */
+.leaf > .page--left {
+  transform: rotateY(180deg);
+}
+
+.page__number {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* ===== Tipografia de livro ===== */
+.page__kicker {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+}
+
+.page__title {
+  margin: 0 0 22px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.page__text {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: var(--color-muted);
+}
+
+.page__text p {
+  margin: 0 0 14px;
+}
+
+/* Letra capitular: a primeira letra grande, como nos livros antigos */
+.page__lead {
+  color: var(--color-white);
+}
+
+.page__lead::first-letter {
+  float: left;
+  margin: 4px 10px 0 0;
+  font-size: 3.4rem;
+  line-height: 0.85;
+  font-weight: 700;
+  color: var(--color-teal);
+}
+
+.page__note {
+  margin: auto 0 0;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--color-muted);
+}
+
+/* ===== Sumário ===== */
+.toc {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc__item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 8px;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--color-white);
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.toc__numeral {
+  min-width: 2.2ch;
+  font-weight: 700;
+  color: var(--color-teal);
+}
+
+/* Linha pontilhada que liga o nome ao número da página */
+.toc__dots {
+  flex: 1;
+  border-bottom: 1px dotted var(--color-muted);
+  opacity: 0.5;
+  transform: translateY(-4px);
+}
+
+.toc__page {
+  color: var(--color-muted);
+}
+
+.toc__item:hover {
+  color: var(--color-sky);
+  background: rgba(56, 189, 248, 0.06);
+}
+
+/* ===== Folha de rosto ===== */
+.cover {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.cover__mark {
+  width: 22px;
+  height: 22px;
+  margin: 18px 0 22px;
+  background: linear-gradient(135deg, var(--color-green), var(--color-sky));
+  border-radius: 5px;
+  transform: rotate(45deg);
+  transition: transform 0.6s ease;
+}
+
+.cover:hover .cover__mark {
+  transform: rotate(225deg);
+}
+
+.cover__title {
+  margin: 0;
+  font-size: clamp(3rem, 6vw, 4.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.cover__title span {
+  color: var(--color-teal);
+}
+
+.cover__subtitle {
+  max-width: 280px;
+  margin: 16px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--color-muted);
+}
+
+.cover__rule {
+  width: 64px;
+  height: 1px;
+  margin: 26px 0;
+  background: var(--color-teal);
+}
+
+.cover__campus {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.cover__hint {
+  margin: 26px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-sky);
+}
+
+/* ===== Autor ===== */
+.author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.author__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-sky);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 50%;
+}
+
+.author__name {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.author__role {
+  margin: 2px 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* ===== Chips (Tag reaproveitado) ===== */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ===== Números ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 18px 0 0;
+}
+
+.stats__item {
+  display: flex;
+  flex-direction: column-reverse; /* o número aparece acima do rótulo */
+  gap: 4px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: transform var(--transition), border-color var(--transition);
+}
+
+.stats__item:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-sky);
+}
+
+.stats dt {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stats dd {
+  margin: 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-teal);
+}
+
+/* ===== Passos ===== */
+.steps {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps__item {
+  display: flex;
+  gap: 16px;
+}
+
+.steps__num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--color-teal);
+  border: 1px solid var(--color-teal);
+  border-radius: 50%;
+  transition: background var(--transition), color var(--transition);
+}
+
+.steps__item:hover .steps__num {
+  color: var(--color-black);
+  background: var(--color-teal);
+}
+
+.steps__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.steps__text {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+/* ===== Página final ===== */
+.ending {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ending__ornament {
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  color: var(--color-green);
+}
+
+.ending__text {
+  max-width: 300px;
+  margin: 0;
+  font-family: var(--font-serif);
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.ending__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* ===================================================
+   CONTROLES
+   =================================================== */
+.sobre__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.sobre__nav {
+  padding: 10px 20px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.sobre__nav:hover:not(:disabled) {
+  border-color: var(--color-sky);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.sobre__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.sobre__dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sobre__dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  background: var(--color-border);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: width var(--transition), background var(--transition);
+}
+
+/* Aumenta a área de clique sem aumentar o visual */
+.sobre__dot::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+.sobre__dot:hover {
+  background: var(--color-sky);
+}
+
+.sobre__dot.is-active {
+  width: 28px;
+  background: var(--color-teal);
+}
+
+.sobre__hint {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* ===================================================
+   TELAS MÉDIAS: páginas um pouco mais compactas
+   =================================================== */
+@media (max-width: 1100px) {
+  .page {
+    padding: 32px 28px 52px;
+  }
+
+  .page__text {
+    font-size: 0.97rem;
+    line-height: 1.65;
+  }
+}
+
+/* ===================================================
+   CELULAR E TABLET PEQUENO: o livro "desmonta"
+   (o número 960 também está em Sobre.jsx)
+   =================================================== */
+@media (max-width: 960px) {
+  .sobre {
+    padding: 72px 20px;
+  }
+
+  .book-wrap {
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .book {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: auto;
+    perspective: none;
+  }
+
+  .book::after {
+    display: none;
+  }
+
+  /* display: contents faz a "caixa" sumir, e as páginas viram filhas diretas do .book */
+  .book__half,
+  .leaf {
+    display: contents;
+  }
+
+  /* O sumário não faz sentido sem o livro */
+  .book__half--left {
+    display: none;
+  }
+
+  .book .page {
+    position: relative;
+    inset: auto;
+    padding: 32px 24px 52px;
+    overflow: visible;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: none;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: none !important;
+  }
+
+  .sobre__controls,
+  .sobre__hint {
+    display: none;
+  }
+
+  .cover,
+  .ending {
+    padding: 24px 0;
+  }
+}
+
+/* ===================================================
+   MOVIMENTO REDUZIDO
+   =================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .leaf,
+  .toc__item,
+  .stats__item,
+  .steps__num,
+  .cover__mark,
+  .sobre__nav,
+  .sobre__dot {
+    transition: none;
+  }
+
+  .stats__item:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,26 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Um losango geométrico, simples e tecnológico */
+.logo__mark {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, var(--color-green), var(--color-sky));
+  transform: rotate(45deg);
+  border-radius: 3px;
+  transition: transform var(--transition);
+}
+
+.logo:hover .logo__mark {
+  transform: rotate(135deg);
+}
+
+.logo__accent {
+  color: var(--color-teal);
+}

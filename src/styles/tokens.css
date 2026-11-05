@@ -1,0 +1,27 @@
+:root {
+  /* Fundos */
+  --color-black: #05080d;
+  --color-navy: #0a1a33;
+  --color-navy-soft: #102847;
+
+  /* Marca */
+  --color-green: #2dd317;
+  --color-teal: #14b8a6;
+  --color-sky: #38bdf8;
+
+  /* Texto */
+  --color-white: #f5f9ff;
+  --color-muted: #9db2c9;
+
+  /* Bordas e superfícies translúcidas */
+  --color-border: rgba(157, 178, 201, 0.16);
+  --color-surface: rgba(10, 26, 51, 0.55);
+
+  /* Tipografia */
+  --font-sans: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  /* Medidas */
+  --header-height: 72px;
+  --radius: 12px;
+  --transition: 0.25s ease;
+}

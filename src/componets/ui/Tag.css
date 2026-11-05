@@ -1,0 +1,23 @@
+.tag {
+  --tag-color: var(--color-muted); /* cor padrão, caso nenhuma seja passada */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 11px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--tag-color);
+  /* color-mix: mistura a cor da tag com transparente, gerando fundo e borda suaves */
+  background: color-mix(in srgb, var(--tag-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 35%, transparent);
+  border-radius: 999px;
+}
+
+/* Bolinha colorida antes do nome */
+.tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tag-color);
+}

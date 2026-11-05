@@ -1,0 +1,48 @@
+.projects {
+  padding: 96px 24px;
+  background: var(--color-black);
+  border-top: 1px solid var(--color-border);
+}
+
+.projects__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.projects__header {
+  max-width: 620px;
+  margin-bottom: 48px;
+}
+
+.projects__filter {
+  margin-bottom: 28px;
+}
+
+.projects__title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.projects__intro {
+  margin: 16px 0 0;
+  font-size: 1.05rem;
+  color: var(--color-muted);
+}
+
+/* Grade responsiva sem nenhuma @media */
+.projects__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.projects__empty {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--color-muted);
+}
