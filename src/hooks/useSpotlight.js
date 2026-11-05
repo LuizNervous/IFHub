@@ -7,7 +7,7 @@ export function useSpotlight() {
     const element = ref.current;
     if (!element) return
 
-    const reduceMotion = window.matchMedia("(preferes-reduced-motion: reduce)");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
 
     const target = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };

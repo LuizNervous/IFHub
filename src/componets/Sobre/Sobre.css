@@ -105,9 +105,17 @@
   transform: rotateY(-180deg);
 }
 
-/* Microinteração: ao passar o mouse nos botões, a folha "espia".
-   :has() permite estilizar a seção com base no que está dentro dela. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sobre:has(.sobre__nav--next:hover:not(:disabled)) .leaf.is-next {
+    transform: rotateY(-14deg);
+  }
+
+  .sobre:has(.sobre__nav--prev:hover:not(:disabled)) .leaf.is-prev {
+    transform: rotateY(-166deg);
+  }
+}
+/* antes: @media (hover: hover) and (prefers-reduced-motion: no-preference) */
+@media (hover: hover) {
   .sobre:has(.sobre__nav--next:hover:not(:disabled)) .leaf.is-next {
     transform: rotateY(-14deg);
   }
@@ -657,7 +665,7 @@
    MOVIMENTO REDUZIDO
    =================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .leaf,
+
   .toc__item,
   .stats__item,
   .steps__num,
