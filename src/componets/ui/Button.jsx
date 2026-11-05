@@ -1,7 +1,19 @@
+import { Link } from "react-router-dom";
 import "./Button.css";
 
-function Button({ href, variant = "primary", size = "md", children, ...rest }) {
+// to   -> navegação interna (Link do roteador, sem recarregar)
+// href -> link externo ou âncora comum (<a>)
+// nenhum dos dois -> <button> de verdade
+function Button({ to, href, variant = "primary", size = "md", children, ...rest }) {
   const className = `button button--${variant} button--${size}`;
+
+  if (to) {
+    return (
+      <Link to={to} className={className} {...rest}>
+        {children}
+      </Link>
+    );
+  }
 
   if (href) {
     return (

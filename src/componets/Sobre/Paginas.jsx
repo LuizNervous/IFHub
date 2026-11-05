@@ -195,7 +195,7 @@ export function PaginaFinal({ onRestart }) {
       </p>
 
       <div className="ending__actions">
-        <Button href="#projetos" variant="primary">Explorar projetos</Button>
+        <Button to="/#projetos" variant="primary">Explorar projetos</Button>
         {/* Sem href, o nosso Button vira um <button> de verdade */}
         <Button variant="ghost" onClick={onRestart}>Reler o livro</Button>
       </div>

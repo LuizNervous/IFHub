@@ -1,7 +1,7 @@
 .sobre {
+  min-height: calc(100vh - var(--header-height));
   padding: 96px 24px;
   background: var(--color-black);
-  border-top: 1px solid var(--color-border);
   overflow: hidden;
 }
 

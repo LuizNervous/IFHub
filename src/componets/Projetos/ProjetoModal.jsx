@@ -1,36 +1,35 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Tag from "../ui/Tag";
 import Button from "../ui/Button";
+import LikeButton from "../ui/LikeButton";
 import { getTechColor } from "../../data/technologies";
 import { isSafeUrl } from "../../utils/isSafeUrl";
+import { isSafeImageSrc } from "../../utils/isSafeImageSrc";
 import { getInitials } from "../../utils/getInitials";
 import "./ProjetoModal.css";
-
 
 function ProjetoModal({ project, onClose }) {
   const dialogRef = useRef(null);
   const titleId = useId();
+  const [imageFailed, setImageFailed] = useState(false);
 
   const {
-    title, description, course, turma, tags,
-    url, repoUrl, advisor,
+    title, description, course, turma, tags = [],
+    image, url, repoUrl, advisor, likes = 0,
     members = [], highlights = [],
   } = project;
 
   const hasSite = url && isSafeUrl(url);
   const hasRepo = repoUrl && isSafeUrl(repoUrl);
+  const showImage = isSafeImageSrc(image) && !imageFailed;
 
-  // Quando o modal aparece, pedimos ao navegador para abri-lo como janela modal.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) dialog.showModal();
   }, []);
 
-  // Fechamos pelo próprio <dialog>: assim o navegador devolve o foco
-  // ao botão "Saiba mais" que abriu a janela (bom para teclado).
   const requestClose = () => dialogRef.current?.close();
 
-  // Clique no fundo escuro = o alvo do clique é o próprio <dialog>.
   const handleBackdropClick = (event) => {
     if (event.target === dialogRef.current) requestClose();
   };
@@ -40,7 +39,7 @@ function ProjetoModal({ project, onClose }) {
       ref={dialogRef}
       className="modal"
       aria-labelledby={titleId}
-      onClose={onClose} // dispara ao fechar (botão, fundo ou tecla Esc)
+      onClose={onClose}
       onClick={handleBackdropClick}
     >
       <div className="modal__content">
@@ -53,59 +52,80 @@ function ProjetoModal({ project, onClose }) {
           ×
         </button>
 
-        <p className="modal__meta">
-          {course} · {turma}
-        </p>
-        <h2 id={titleId} className="modal__title">{title}</h2>
-        <p className="modal__description">{description}</p>
+        {/* Foto grande: a MESMA imagem duas vezes.
+            Atrás, desfocada e preenchendo tudo; na frente, nítida e inteira. */}
+        {showImage && (
+          <div className="modal__media">
+            <img
+              src={image}
+              alt=""
+              aria-hidden="true"
+              referrerPolicy="no-referrer"
+              className="modal__media-blur"
+            />
+            <img
+              src={image}
+              alt={`Captura de tela do projeto ${title}`}
+              referrerPolicy="no-referrer"
+              className="modal__media-image"
+              onError={() => setImageFailed(true)}
+            />
+          </div>
+        )}
 
-        {members.length > 0 && (
+        <div className="modal__body">
+          <p className="modal__meta">
+            {course} · {turma}
+          </p>
+          <h2 id={titleId} className="modal__title">{title}</h2>
+          <p className="modal__description">{description}</p>
+
+          {members.length > 0 && (
+            <section className="modal__section">
+              <h3 className="modal__heading">Integrantes</h3>
+              <ul className="modal__members">
+                {members.map((member) => (
+                  <li key={member.name} className="modal__member">
+                    <span className="modal__avatar" aria-hidden="true">
+                      {getInitials(member.name)}
+                    </span>
+                    <span>
+                      <span className="modal__member-name">{member.name}</span>
+                      <span className="modal__member-role">{member.role}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {advisor && (
+                <p className="modal__advisor">
+                  Orientação: <strong>{advisor}</strong>
+                </p>
+              )}
+            </section>
+          )}
+
+          {highlights.length > 0 && (
+            <section className="modal__section">
+              <h3 className="modal__heading">Destaques</h3>
+              <ul className="modal__highlights">
+                {highlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <section className="modal__section">
-            <h3 className="modal__heading">Integrantes</h3>
-            <ul className="modal__members">
-              {members.map((member) => (
-                <li key={member.name} className="modal__member">
-                  <span className="modal__avatar" aria-hidden="true">
-                    {getInitials(member.name)}
-                  </span>
-                  <span>
-                    <span className="modal__member-name">{member.name}</span>
-                    <span className="modal__member-role">{member.role}</span>
-                  </span>
+            <h3 className="modal__heading">Tecnologias</h3>
+            <ul className="modal__tags">
+              {tags.map((tag) => (
+                <li key={tag}>
+                  <Tag color={getTechColor(tag)}>{tag}</Tag>
                 </li>
               ))}
             </ul>
-            {advisor && (
-              <p className="modal__advisor">
-                Orientação: <strong>{advisor}</strong>
-              </p>
-            )}
           </section>
-        )}
 
-        {highlights.length > 0 && (
-          <section className="modal__section">
-            <h3 className="modal__heading">Destaques</h3>
-            <ul className="modal__highlights">
-              {highlights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <section className="modal__section">
-          <h3 className="modal__heading">Tecnologias</h3>
-          <ul className="modal__tags">
-            {tags.map((tag) => (
-              <li key={tag}>
-                <Tag color={getTechColor(tag)}>{tag}</Tag>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {(hasSite || hasRepo) && (
           <div className="modal__actions">
             {hasSite && (
               <Button href={url} variant="primary" target="_blank" rel="noopener noreferrer">
@@ -117,8 +137,11 @@ function ProjetoModal({ project, onClose }) {
                 Ver código
               </Button>
             )}
+            <div className="modal__like">
+              <LikeButton count={likes} subject={title} />
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </dialog>
   );

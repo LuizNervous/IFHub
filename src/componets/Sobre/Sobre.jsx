@@ -62,9 +62,9 @@ function Sobre() {
       <div className="sobre__container">
         <header className="sobre__header">
           <p className="sobre__eyebrow">Sobre o projeto</p>
-          <h2 id="sobre-title" className="sobre__title">
+          <h1 id="sobre-title" className="sobre__title">
             Um livro escrito pelos alunos
-          </h2>
+          </h1>
         </header>
 
         <div className="book-wrap">

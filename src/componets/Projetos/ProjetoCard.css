@@ -1,40 +1,38 @@
 .project-card {
-  /* Cor de destaque: o JSX sobrescreve esta variável com a cor da tecnologia */
   --card-accent: var(--color-teal);
-  /* Posição inicial da luz do mouse (o hook atualiza estes valores) */
   --mouse-x: 50%;
   --mouse-y: 50%;
 
-  position: relative;   /* referência para o link esticado e para o brilho */
-  isolation: isolate;   /* cria um "mundo" de camadas só para este card */
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: 18px;
   transition: transform var(--transition), border-color var(--transition),
     box-shadow var(--transition);
 }
 
 .project-card:hover,
 .project-card:focus-within {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
   border-color: color-mix(in srgb, var(--card-accent) 55%, transparent);
-  box-shadow: 0 16px 40px color-mix(in srgb, var(--card-accent) 14%, transparent);
+  box-shadow: 0 20px 48px color-mix(in srgb, var(--card-accent) 16%, transparent);
 }
 
 /* ===== Luz que segue o mouse ===== */
 .project-card__glow {
   position: absolute;
   inset: 0;
-  z-index: -1;            /* atrás do conteúdo, mas à frente do fundo do card */
+  z-index: -1;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
   background: radial-gradient(
-    circle 240px at var(--mouse-x) var(--mouse-y),
+    circle 260px at var(--mouse-x) var(--mouse-y),
     color-mix(in srgb, var(--card-accent) 18%, transparent),
     transparent 70%
   );
@@ -44,13 +42,13 @@
   opacity: 1;
 }
 
-/* ===== Capa ===== */
+/* ===== Capa: proporção fixa, a imagem nunca "quebra" ===== */
 .project-card__cover {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 160px;
+  aspect-ratio: 16 / 10;          /* a altura acompanha a largura */
   overflow: hidden;
   background:
     radial-gradient(
@@ -59,16 +57,32 @@
       transparent 65%
     ),
     var(--color-navy-soft);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--card-accent) 35%, var(--color-border));
 }
 
-.project-card__cover img {
+.project-card__image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover;              /* preenche sem distorcer */
+  object-position: center;
+  transition: transform 0.6s ease;
 }
 
-/* Grade tecnológica sutil, que some nas bordas */
+.project-card:hover .project-card__image {
+  transform: scale(1.05);
+}
+
+/* Degradê sutil na base da foto: dá profundidade e liga a capa ao corpo */
+.project-card__cover::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(5, 8, 13, 0.55), transparent);
+}
+
+/* Fallback sem imagem */
 .project-card__pattern {
   position: absolute;
   inset: 0;
@@ -81,8 +95,8 @@
 }
 
 .project-card__initial {
-  position: relative;     /* fica acima da grade */
-  font-size: 5rem;
+  position: relative;
+  font-size: 5.5rem;
   font-weight: 700;
   line-height: 1;
   color: var(--card-accent);
@@ -95,9 +109,10 @@
   transform: scale(1.08);
 }
 
-/* Selo da turma em "vidro", usado com moderação */
+/* Selo da turma em "vidro" (z-index: acima do degradê da capa) */
 .project-card__badge {
   position: absolute;
+  z-index: 1;
   top: 14px;
   left: 14px;
   padding: 4px 12px;
@@ -117,8 +132,8 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px;
+  gap: 14px;
+  padding: 24px;
 }
 
 .project-card__meta {
@@ -132,17 +147,16 @@
 
 .project-card__title {
   margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  font-size: 1.4rem;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
 }
 
-/* Limita a 3 linhas e termina com "..." */
 .project-card__description {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
-  font-size: 0.95rem;
+  font-size: 0.97rem;
   color: var(--color-muted);
   -webkit-line-clamp: 3;
   line-clamp: 3;
@@ -186,7 +200,7 @@
 .project-card__link-area:focus-visible::after {
   outline: 2px solid var(--color-sky);
   outline-offset: -2px;
-  border-radius: 16px;
+  border-radius: 18px;
 }
 
 .project-card__arrow {
@@ -209,10 +223,17 @@
 .project-card__footer {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: auto;          /* sempre colado embaixo, com qualquer altura de texto */
-  padding-top: 16px;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 18px;
   border-top: 1px solid var(--color-border);
+}
+
+.project-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .project-card__team {
@@ -228,22 +249,22 @@
   list-style: none;
 }
 
+/* Avatar maior e sobreposição menor: as iniciais não ficam mais cortadas */
 .project-card__avatar {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  font-size: 0.65rem;
+  width: 32px;
+  height: 32px;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--color-sky);
   background: var(--color-navy-soft);
   border-radius: 50%;
-  /* anel escuro: cria o efeito de avatares sobrepostos */
-  box-shadow: 0 0 0 2px var(--color-black);
+  box-shadow: 0 0 0 2px var(--color-navy);
 }
 
 .project-card__avatar + .project-card__avatar {
-  margin-left: -8px;
+  margin-left: -6px;
 }
 
 .project-card__team-text {
@@ -257,7 +278,8 @@
   gap: 16px;
 }
 
-/* Botão e link ficam ACIMA da camada clicável do card */
+/* Tudo o que é clicável no rodapé fica ACIMA da camada do link esticado */
+.project-card__row > .like,
 .project-card__actions > * {
   position: relative;
   z-index: 1;
@@ -276,6 +298,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .project-card,
+  .project-card__image,
   .project-card__initial,
   .project-card__arrow,
   .project-card__glow {
@@ -287,6 +310,7 @@
     transform: none;
   }
 
+  .project-card:hover .project-card__image,
   .project-card:hover .project-card__initial {
     transform: none;
   }

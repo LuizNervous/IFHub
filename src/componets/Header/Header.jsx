@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Logo from "../ui/Logo";
 import Button from "../ui/Button";
 import "./Header.css";
 
 const NAV_ITEMS = [
-  { label: "Início", href: "#inicio" },
-  { label: "Projetos", href: "#projetos" },
-  { label: "Sobre", href: "#sobre" },
+  { label: "Início", to: "/" },
+  { label: "Projetos", to: "/#projetos" },
+  { label: "Sobre", to: "/sobre" },
 ];
 
 function Header() {
@@ -36,10 +37,10 @@ function Header() {
           <nav aria-label="Navegação principal">
             <ul className="header__list">
               {NAV_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <a href={item.href} className="header__link" onClick={closeMenu}>
+                <li key={item.to}>
+                  <Link to={item.to} className="header__link" onClick={closeMenu}>
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -47,7 +48,7 @@ function Header() {
 
           <div className="header__actions">
             <Button href="#admin" variant="ghost">Área restrita</Button>
-            <Button href="#projetos" variant="primary">Explorar projetos</Button>
+            <Button to="/#projetos" variant="primary">Explorar projetos</Button>
           </div>
         </div>
       </div>

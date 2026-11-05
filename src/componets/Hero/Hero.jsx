@@ -21,8 +21,8 @@ function Hero() {
         </p>
 
         <div className="hero__actions">
-          <Button href="#projetos" variant="primary">Explorar projetos</Button>
-          <Button href="#sobre" variant="ghost">Saiba mais</Button>
+          <Button to="/#projetos" variant="primary">Explorar projetos</Button>
+          <Button to="/sobre" variant="ghost">Saiba mais</Button>
         </div>
       </div>
     </section>

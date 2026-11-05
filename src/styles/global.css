@@ -39,6 +39,44 @@ a {
   border: 0;
 }
 
+/* ===== Barra de rolagem estilizada ===== */
+html,
+.modal,
+.page {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+
+@supports not (scrollbar-width: thin) {
+  html::-webkit-scrollbar,
+  .modal::-webkit-scrollbar,
+  .page::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  html::-webkit-scrollbar-track,
+  .modal::-webkit-scrollbar-track,
+  .page::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  .modal::-webkit-scrollbar-thumb,
+  .page::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border: 3px solid transparent;
+    background-clip: padding-box; /* a borda transparente "afina" a barra */
+    border-radius: 999px;
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  .modal::-webkit-scrollbar-thumb:hover,
+  .page::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hover);
+    background-clip: padding-box;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;

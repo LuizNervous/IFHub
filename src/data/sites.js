@@ -15,6 +15,7 @@ export const projects = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFDtQYSGyyJRcQF6lx66F09NUKDi7ni6aLs-Mnxr-Oqw&s=10",
     url: "https://example.com/projeto-1",
     repoUrl: "https://github.com/exemplo/projeto-1",
+    likes: 24,
     advisor: "Prof. Carlos Almeida",
     members: [
       { name: "Ana Beatriz Souza", role: "Front-end e design" },
@@ -38,6 +39,7 @@ export const projects = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBn_BvGj1aDMl0p_zQlMXVEPnkmgb0fGT6JIKoaqEWpQ&s=10",
     url: "https://example.com/projeto-2",
     repoUrl: null, // sem repositório público: o card lida com isso
+    likes: 24,
     advisor: "Profa. Renata Oliveira",
     members: [
       { name: "Pedro Henrique Lima", role: "Aplicativo mobile" },
@@ -59,6 +61,7 @@ export const projects = [
     image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWnXJhTFKyBHApg0RwOwtDOQHjIJCyIox0muZFFI0x5A&s=10',
     url: "https://example.com/projeto-3",
     repoUrl: "https://github.com/exemplo/projeto-3",
+    likes: 24,
     advisor: "Prof. Marcos Tavares",
     members: [
       { name: "Gabriel Rocha", role: "Back-end em PHP" },
@@ -81,6 +84,7 @@ export const projects = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-b52mxUCJ_Qif72T5Ohkuts89BG9SkUck8qvFDhwk0g&s=10",
     url: null, // sem site: o card não é clicável, mas "Saiba mais" funciona
     repoUrl: "https://github.com/exemplo/projeto-4",
+    likes: 24,
     advisor: "Prof. Carlos Almeida",
     members: [
       { name: "Rafael Gomes", role: "Eletrônica e Arduino" },
@@ -102,6 +106,7 @@ export const projects = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpioDWoMfflBMRTw_tBo65p_7ApVcsT2rfuppz4uPAww&s=10",
     url: "https://example.com/projeto-5",
     repoUrl: "https://github.com/exemplo/projeto-5",
+    likes: 24,
     advisor: "Profa. Renata Oliveira",
     members: [
       { name: "Beatriz Andrade", role: "Front-end" },
@@ -124,6 +129,7 @@ export const projects = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkGi2KUbNH3y5KT5qx5UKuLCUfKpqQF1u1dI_akrIB4g&s=10",
     url: "https://example.com/projeto-6",
     repoUrl: null,
+    likes: 24,
     advisor: "Prof. Marcos Tavares",
     members: [
       { name: "Eduardo Silveira", role: "Programação do jogo" },

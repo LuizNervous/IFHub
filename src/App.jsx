@@ -1,20 +1,18 @@
-import Header from "./componets/Header/Header";
-import Hero from "./componets/Hero/Hero"
-import ProjetosSection from "./componets/Projetos/ProjetosSection";
-import Footer from "./componets/Footer/Footer";
-import Sobre from "./componets/Sobre/Sobre";
+import { Routes, Route } from "react-router-dom";
+import Layout from "./componets/Layout/Layout";
+import HomePage from "./pages/HomePage";
+import SobrePage from "./pages/SobrePage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
-    <>
-      <Header />
-      <main >
-       <Hero />
-       <ProjetosSection/>
-       <Sobre />
-      </main>
-      <Footer />
-    </>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="sobre" element={<SobrePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }
 

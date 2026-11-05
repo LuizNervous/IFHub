@@ -13,6 +13,13 @@
   --color-white: #f5f9ff;
   --color-muted: #9db2c9;
 
+  /* Barra de rolagem */
+  --scroll-thumb: rgba(157, 178, 201, 0.28);
+  --scroll-thumb-hover: rgba(20, 184, 166, 0.6);
+
+  /* curtidas */
+  --color-like: #fb7185;
+
   /* Bordas e superfícies translúcidas */
   --color-border: rgba(157, 178, 201, 0.16);
   --color-surface: rgba(10, 26, 51, 0.55);

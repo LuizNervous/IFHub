@@ -1,12 +1,13 @@
 .modal {
-  width: min(560px, calc(100% - 32px));
+  width: min(720px, calc(100% - 32px));
   max-height: calc(100vh - 48px);
-  padding: 0;                /* o padding fica no .modal__content, para o clique no fundo funcionar */
+  padding: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   color: var(--color-white);
   background: var(--color-navy);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
 }
 
@@ -23,33 +24,39 @@ body:has(.modal[open]) {
 
 .modal__content {
   position: relative;
+}
+
+.modal__body {
   padding: 32px;
 }
 
 .modal__close {
   position: absolute;
+  z-index: 2;
   top: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   font-size: 1.4rem;
   line-height: 1;
-  color: var(--color-muted);
-  background: transparent;
+  color: var(--color-white);
+  background: rgba(5, 8, 13, 0.6);
   border: 1px solid var(--color-border);
   border-radius: 50%;
   cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color var(--transition);
 }
 
 .modal__close:hover {
-  color: var(--color-white);
   border-color: var(--color-sky);
 }
 
 .modal__meta {
   margin: 0 0 8px;
-  padding-right: 48px; /* não encosta no botão de fechar */
+  padding-right: 48px;
+  /* não encosta no botão de fechar */
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -172,6 +179,40 @@ body:has(.modal[open]) {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 32px;
+}
+
+/* ===== Foto grande ===== */
+.modal__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-navy-soft);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Cópia desfocada que preenche o fundo */
+.modal__media-blur {
+  position: absolute;
+  inset: -24px;
+  /* sobra para o blur não clarear as bordas */
+  width: calc(100% + 48px);
+  height: calc(100% + 48px);
+  object-fit: cover;
+  filter: blur(28px) saturate(1.3) brightness(0.6);
+}
+
+/* Cópia nítida e INTEIRA por cima */
+.modal__media-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ===== Curtir no rodapé do modal ===== */
+.modal__like {
+  margin-left: auto;
+  /* empurra o botão para a direita */
 }
 
 /* Animação de entrada, só para quem não pediu movimento reduzido */
