@@ -1,3 +1,4 @@
+/* ProjetosSection.css */
 .projects {
   padding: 96px 24px;
   background: var(--color-black);
@@ -31,7 +32,7 @@
   color: var(--color-muted);
 }
 
-/* Grade responsiva sem nenhuma @media */
+/* Grade responsiva */
 .projects__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -39,6 +40,21 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Entrada escalonada (stagger) dos cards ao carregar ou filtrar */
+.projects__grid-item {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  animation: card-stagger-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 65ms);
+}
+
+@keyframes card-stagger-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .projects__empty {

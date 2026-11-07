@@ -10,7 +10,6 @@
 }
 
 /* ===== Camada 1: grade tecnológica ===== */
-/* O background-size (56px) precisa ser igual ao CELL do GridGlow.jsx */
 .hero__grid {
   position: absolute;
   inset: 0;
@@ -25,8 +24,20 @@
 
 /* ===== Camada 3: conteúdo ===== */
 .hero__content {
-  position: relative; /* fica acima da grade e do canvas */
+  position: relative;
   max-width: 760px;
+  animation: hero-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero__title {
@@ -37,15 +48,40 @@
   letter-spacing: -0.04em;
 }
 
+/* Degradê animado bem visível + brilho neon suave */
 .hero__title-accent {
-  color: var(--color-teal);
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    #38bdf8 0%,
+    #14b8a6 30%,
+    #4ade80 60%,
+    #38bdf8 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 24px rgba(20, 184, 166, 0.35));
+  animation: hub-gradient 4s linear infinite;
+}
+
+@keyframes hub-gradient {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 250% center;
+  }
 }
 
 .hero__subtitle {
   margin: 24px auto 0;
-  max-width: 700px; /* era 560px: evita "Informática" sozinha na linha */
+  max-width: 700px;
   font-size: clamp(1rem, 2.2vw, 1.2rem);
   color: var(--color-muted);
+  cursor: default;
 }
 
 .hero__actions {

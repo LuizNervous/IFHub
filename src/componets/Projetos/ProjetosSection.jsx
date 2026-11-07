@@ -1,4 +1,6 @@
+// ProjetosSection.jsx
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { listarProjetos, listarTurmas } from "../../services/projetosService";
 import FilterBar from "../ui/FilterBar";
 import ProjetoCard from "./ProjetoCard";
@@ -14,7 +16,7 @@ function ProjetosSection() {
   const [selectedTurma, setSelectedTurma] = useState(ALL);
 
   useEffect(() => {
-    let cancelado = false; // evita atualizar estado se o componente sumiu
+    let cancelado = false;
 
     async function carregar() {
       try {
@@ -24,11 +26,9 @@ function ProjetosSection() {
         ]);
         if (cancelado) return;
 
-        // 2. Se tiver projetos no banco, usa os do banco. Se vier vazio (0), usa o sites.js
         const temProjetosNoBanco = listaProjetos && listaProjetos.length > 0;
         setProjects(temProjetosNoBanco ? listaProjetos : fallbackProjects);
 
-        // Faz o mesmo para as turmas
         const temTurmasNoBanco = listaTurmas && listaTurmas.length > 0;
         setTurmas(temTurmasNoBanco ? listaTurmas : fallbackTurmas);
 
@@ -49,6 +49,20 @@ function ProjetosSection() {
     };
   }, []);
 
+  const handleSelectTurma = (novaTurma) => {
+    if (novaTurma === selectedTurma) return;
+
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        flushSync(() => {
+          setSelectedTurma(novaTurma);
+        });
+      });
+    } else {
+      setSelectedTurma(novaTurma);
+    }
+  };
+
   const filterOptions = [ALL, ...turmas];
   const visibleProjects =
     selectedTurma === ALL
@@ -65,7 +79,7 @@ function ProjetosSection() {
               label="Filtrar projetos por turma"
               options={filterOptions}
               value={selectedTurma}
-              onChange={setSelectedTurma}
+              onChange={handleSelectTurma}
             />
           </div>
 
@@ -78,7 +92,6 @@ function ProjetosSection() {
           </p>
         </header>
 
-        {/* Avisa leitores de tela quando o filtro muda a lista */}
         {status === "ready" && (
           <p className="visually-hidden" role="status">
             {count} {count === 1 ? "projeto exibido" : "projetos exibidos"}
@@ -99,8 +112,15 @@ function ProjetosSection() {
             </p>
           ) : (
             <ul className="projects__grid">
-              {visibleProjects.map((project) => (
-                <li key={project.id}>
+              {visibleProjects.map((project, index) => (
+                <li
+                  key={`${selectedTurma}-${project.id}`}
+                  className="projects__grid-item"
+                  style={{
+                    "--card-index": index,
+                    viewTransitionName: `project-item-${project.id}`,
+                  }}
+                >
                   <ProjetoCard project={project} />
                 </li>
               ))}

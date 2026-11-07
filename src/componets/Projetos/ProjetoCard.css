@@ -1,7 +1,10 @@
 .project-card {
   --card-accent: var(--color-teal);
+  --turma-badge-color: var(--color-teal);
   --mouse-x: 50%;
   --mouse-y: 50%;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
 
   position: relative;
   isolation: isolate;
@@ -12,13 +15,14 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 18px;
-  transition: transform var(--transition), border-color var(--transition),
+  transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  transition: transform 0.18s ease-out, border-color var(--transition),
     box-shadow var(--transition);
 }
 
 .project-card:hover,
 .project-card:focus-within {
-  transform: translateY(-6px);
+  transform: perspective(1000px) translateY(-6px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
   border-color: color-mix(in srgb, var(--card-accent) 55%, transparent);
   box-shadow: 0 20px 48px color-mix(in srgb, var(--card-accent) 16%, transparent);
 }
@@ -48,7 +52,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 16 / 10;          /* a altura acompanha a largura */
+  aspect-ratio: 16 / 10;
   overflow: hidden;
   background:
     radial-gradient(
@@ -63,7 +67,7 @@
 .project-card__image {
   width: 100%;
   height: 100%;
-  object-fit: cover;              /* preenche sem distorcer */
+  object-fit: cover;
   object-position: center;
   transition: transform 0.6s ease;
 }
@@ -72,7 +76,7 @@
   transform: scale(1.05);
 }
 
-/* Degradê sutil na base da foto: dá profundidade e liga a capa ao corpo */
+/* Degradê sutil na base da foto */
 .project-card__cover::after {
   content: "";
   position: absolute;
@@ -109,22 +113,34 @@
   transform: scale(1.08);
 }
 
-/* Selo da turma em "vidro" (z-index: acima do degradê da capa) */
+/* Selo da turma em "vidro" com a cor exclusiva de cada IIW */
 .project-card__badge {
   position: absolute;
   z-index: 1;
   top: 14px;
   left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 12px;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-white);
-  background: rgba(5, 8, 13, 0.55);
-  border: 1px solid var(--color-border);
+  background: rgba(5, 8, 13, 0.72);
+  border: 1px solid color-mix(in srgb, var(--turma-badge-color) 65%, transparent);
   border-radius: 999px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--turma-badge-color) 25%, transparent);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+}
+
+.project-card__badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--turma-badge-color);
+  box-shadow: 0 0 6px var(--turma-badge-color);
 }
 
 /* ===== Corpo ===== */
@@ -142,7 +158,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-green);
+  color: var(--turma-badge-color, var(--color-green));
 }
 
 .project-card__title {
@@ -240,6 +256,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .project-card__avatars {
@@ -249,7 +267,7 @@
   list-style: none;
 }
 
-/* Avatar maior e sobreposição menor: as iniciais não ficam mais cortadas */
+/* Avatar maior e sobreposição menor com expansão em leque no hover */
 .project-card__avatar {
   display: grid;
   place-items: center;
@@ -261,10 +279,21 @@
   background: var(--color-navy-soft);
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--color-navy);
+  transition: margin-left 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.25s ease;
 }
 
 .project-card__avatar + .project-card__avatar {
   margin-left: -6px;
+}
+
+.project-card__team:hover .project-card__avatar + .project-card__avatar {
+  margin-left: 5px;
+}
+
+.project-card__avatar:hover {
+  transform: translateY(-4px) scale(1.1);
+  z-index: 2;
 }
 
 .project-card__team-text {
@@ -294,24 +323,4 @@
 
 .project-card__link:hover {
   color: var(--color-white);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .project-card,
-  .project-card__image,
-  .project-card__initial,
-  .project-card__arrow,
-  .project-card__glow {
-    transition: none;
-  }
-
-  .project-card:hover,
-  .project-card:focus-within {
-    transform: none;
-  }
-
-  .project-card:hover .project-card__image,
-  .project-card:hover .project-card__initial {
-    transform: none;
-  }
 }

@@ -17,7 +17,7 @@
 
 .sobre__eyebrow {
   margin: 0 0 12px;
-  font-size:1.5rem;
+  font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -105,16 +105,6 @@
   transform: rotateY(-180deg);
 }
 
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .sobre:has(.sobre__nav--next:hover:not(:disabled)) .leaf.is-next {
-    transform: rotateY(-14deg);
-  }
-
-  .sobre:has(.sobre__nav--prev:hover:not(:disabled)) .leaf.is-prev {
-    transform: rotateY(-166deg);
-  }
-}
-/* antes: @media (hover: hover) and (prefers-reduced-motion: no-preference) */
 @media (hover: hover) {
   .sobre:has(.sobre__nav--next:hover:not(:disabled)) .leaf.is-next {
     transform: rotateY(-14deg);
@@ -135,12 +125,10 @@
   overflow-y: auto;
   scrollbar-width: thin;
   color: var(--color-white);
-  /* um único brilho discreto no canto, no tom da identidade */
   background:
     radial-gradient(circle at 100% 0, rgba(20, 184, 166, 0.07), transparent 55%),
     var(--color-navy);
   border: 1px solid var(--color-border);
-  /* esconde o lado de trás: assim só vemos a face voltada para nós */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -225,7 +213,7 @@
   color: var(--color-muted);
 }
 
-/* ===== Sumário ===== */
+/* ===== Sumário (Com Preenchimento Animado na Linha Pontilhada) ===== */
 .toc {
   display: grid;
   gap: 2px;
@@ -248,30 +236,65 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 .toc__numeral {
   min-width: 2.2ch;
   font-weight: 700;
   color: var(--color-teal);
+  transition: transform 0.25s ease, color 0.25s ease;
 }
 
-/* Linha pontilhada que liga o nome ao número da página */
+/* Linha pontilhada que liga o nome ao número da página + barra luminosa que preenche */
 .toc__dots {
+  position: relative;
   flex: 1;
-  border-bottom: 1px dotted var(--color-muted);
-  opacity: 0.5;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.35);
   transform: translateY(-4px);
+}
+
+.toc__dots::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-teal), var(--color-sky));
+  box-shadow: 0 0 10px var(--color-teal);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .toc__page {
   color: var(--color-muted);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
 }
 
-.toc__item:hover {
+.toc__item:hover,
+.toc__item:focus-visible {
   color: var(--color-sky);
   background: rgba(56, 189, 248, 0.06);
+}
+
+.toc__item:hover .toc__dots::after,
+.toc__item:focus-visible .toc__dots::after {
+  transform: scaleX(1);
+}
+
+.toc__item:hover .toc__page,
+.toc__item:focus-visible .toc__page {
+  transform: translateX(6px);
+  color: var(--color-teal);
+  font-weight: 700;
+}
+
+.toc__item:hover .toc__numeral,
+.toc__item:focus-visible .toc__numeral {
+  transform: translateX(3px);
+  color: var(--color-sky);
 }
 
 /* ===== Folha de rosto ===== */
@@ -402,7 +425,7 @@
 
 .stats__item {
   display: flex;
-  flex-direction: column-reverse; /* o número aparece acima do rótulo */
+  flex-direction: column-reverse;
   gap: 4px;
   padding: 18px;
   background: rgba(255, 255, 255, 0.02);
@@ -528,7 +551,7 @@
   color: var(--color-white);
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 999px;
   cursor: pointer;
   transition: border-color var(--transition), background var(--transition);
 }
@@ -561,7 +584,6 @@
   transition: width var(--transition), background var(--transition);
 }
 
-/* Aumenta a área de clique sem aumentar o visual */
 .sobre__dot::after {
   content: "";
   position: absolute;
@@ -585,7 +607,7 @@
 }
 
 /* ===================================================
-   TELAS MÉDIAS: páginas um pouco mais compactas
+   TELAS MÉDIAS
    =================================================== */
 @media (max-width: 1100px) {
   .page {
@@ -599,8 +621,7 @@
 }
 
 /* ===================================================
-   CELULAR E TABLET PEQUENO: o livro "desmonta"
-   (o número 960 também está em Sobre.jsx)
+   CELULAR E TABLET PEQUENO
    =================================================== */
 @media (max-width: 960px) {
   .sobre {
@@ -626,13 +647,11 @@
     display: none;
   }
 
-  /* display: contents faz a "caixa" sumir, e as páginas viram filhas diretas do .book */
   .book__half,
   .leaf {
     display: contents;
   }
 
-  /* O sumário não faz sentido sem o livro */
   .book__half--left {
     display: none;
   }
@@ -658,24 +677,5 @@
   .cover,
   .ending {
     padding: 24px 0;
-  }
-}
-
-/* ===================================================
-   MOVIMENTO REDUZIDO
-   =================================================== */
-@media (prefers-reduced-motion: reduce) {
-
-  .toc__item,
-  .stats__item,
-  .steps__num,
-  .cover__mark,
-  .sobre__nav,
-  .sobre__dot {
-    transition: none;
-  }
-
-  .stats__item:hover {
-    transform: none;
   }
 }

@@ -1,4 +1,5 @@
 .like {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -10,9 +11,17 @@
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  cursor: default;
+  cursor: pointer;
   transition: color var(--transition), background var(--transition),
-    border-color var(--transition);
+    border-color var(--transition), transform 0.15s ease;
+}
+
+.like[aria-disabled="true"] {
+  cursor: default;
+}
+
+.like:active:not([aria-disabled="true"]) {
+  transform: scale(0.92);
 }
 
 /* O contorno só é desenhado; o preenchimento aparece quando curtido */
@@ -27,9 +36,9 @@
 }
 
 .like:hover {
-  color: var(--color-like);
-  border-color: color-mix(in srgb, var(--color-like) 55%, transparent);
-  background: color-mix(in srgb, var(--color-like) 10%, transparent);
+  color: var(--color-like, #f43f5e);
+  border-color: color-mix(in srgb, var(--color-like, #f43f5e) 55%, transparent);
+  background: color-mix(in srgb, var(--color-like, #f43f5e) 10%, transparent);
 }
 
 .like:hover .like__icon {
@@ -38,33 +47,50 @@
 
 /* ===== Estado curtido ===== */
 .like.is-liked {
-  color: var(--color-like);
-  border-color: color-mix(in srgb, var(--color-like) 55%, transparent);
-  background: color-mix(in srgb, var(--color-like) 14%, transparent);
+  color: var(--color-like, #f43f5e);
+  border-color: color-mix(in srgb, var(--color-like, #f43f5e) 55%, transparent);
+  background: color-mix(in srgb, var(--color-like, #f43f5e) 14%, transparent);
 }
 
 .like.is-liked .like__icon {
   fill: currentColor;
+  animation: like-pop 0.45s cubic-bezier(0.17, 0.89, 0.32, 1.49);
 }
 
-/* Pulinho ao curtir: só para quem não pediu movimento reduzido */
+/* Partículas suaves ao curtir */
+.like.is-liked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 18px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: like-particles 0.55s ease-out forwards;
+}
+
 @keyframes like-pop {
-  40% { transform: scale(1.35); }
+  0% { transform: scale(1); }
+  40% { transform: scale(1.38); }
+  100% { transform: scale(1); }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .like.is-liked .like__icon {
-    animation: like-pop 0.35s ease;
+@keyframes like-particles {
+  0% {
+    opacity: 1;
+    box-shadow:
+      0 0 0 var(--color-like, #f43f5e),
+      0 0 0 var(--color-sky),
+      0 0 0 var(--color-like, #f43f5e),
+      0 0 0 var(--color-teal);
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .like,
-  .like__icon {
-    transition: none;
-  }
-
-  .like:hover .like__icon {
-    transform: none;
+  100% {
+    opacity: 0;
+    box-shadow:
+      -14px -12px 0 var(--color-like, #f43f5e),
+      14px -10px 0 var(--color-sky),
+      -10px 12px 0 var(--color-teal),
+      12px 12px 0 var(--color-like, #f43f5e);
   }
 }

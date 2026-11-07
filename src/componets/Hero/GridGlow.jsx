@@ -1,22 +1,19 @@
 import { useEffect, useRef } from "react";
 import "./GridGlow.css";
 
-// ===== Configurações: mude aqui para ajustar o efeito =====
-const CELL = 56;        // tamanho do quadrado em px (igual ao background-size da grade no Hero.css)
-const RADIUS = 140;     // raio da área iluminada ao redor do cursor, em px
-const DECAY = 0.93;     // quanto MENOR, mais rápido o quadrado apaga
-const MAX_ALPHA = 0.42; // opacidade máxima do preenchimento (mantém o texto legível)
+const CELL = 56;
+const RADIUS = 80;
+const DECAY = 0.93;
+const MAX_ALPHA = 0.5;
 
 const SKY = [56, 189, 248];
 const TEAL = [20, 184, 166];
 const GREEN = [52, 211, 153];
 
-// Mistura duas cores RGB. t = 0 devolve a), t = 1 devolve b).
 function mix(a, b, t) {
   return a.map((value, i) => Math.round(value + (b[i] - value) * t));
 }
 
-// intensidade 1 = azul-claro, 0,5 = teal, perto de 0 = verde
 function colorFor(intensity) {
   return intensity > 0.5
     ? mix(TEAL, SKY, (intensity - 0.5) * 2)
@@ -28,29 +25,26 @@ function GridGlow() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const area = canvas?.parentElement; // a <section> do Hero
+    const area = canvas?.parentElement;
     if (!canvas || !area) return;
 
     const ctx = canvas.getContext("2d");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const noHover = window.matchMedia("(hover: none)").matches; // celular/tablet
 
     let width = 0;
     let height = 0;
     let cols = 0;
     let rows = 0;
-    let intensity = new Float32Array(0); // um número (0 a 1) por quadrado
+    let intensity = new Float32Array(0);
     let frameId = null;
-    let ambientId = null;
+    let ripples = [];
 
-    // ----- Desenha todos os quadrados acesos -----
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const value = intensity[row * cols + col];
-          if (value <= 0) continue; // apagado: não desenha
+          if (value <= 0) continue;
 
           const [r, g, b] = colorFor(value);
           const x = col * CELL;
@@ -59,16 +53,51 @@ function GridGlow() {
           ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${value * MAX_ALPHA})`;
           ctx.fillRect(x + 1, y + 1, CELL - 1, CELL - 1);
 
-          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${value * 0.9})`;
+          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${value * 0.95})`;
           ctx.strokeRect(x + 1.5, y + 1.5, CELL - 2, CELL - 2);
         }
       }
     };
 
-    // ----- Laço de animação: apaga aos poucos e redesenha -----
     const tick = () => {
       let alive = false;
 
+      // 1. Ondas de choque em expansão (clique ou abertura)
+      for (let r = ripples.length - 1; r >= 0; r--) {
+        const ripple = ripples[r];
+        ripple.radius += 10;
+        const bandWidth = CELL * 1.4;
+
+        const firstCol = Math.max(0, Math.floor((ripple.x - ripple.radius - bandWidth) / CELL));
+        const lastCol = Math.min(cols - 1, Math.floor((ripple.x + ripple.radius + bandWidth) / CELL));
+        const firstRow = Math.max(0, Math.floor((ripple.y - ripple.radius - bandWidth) / CELL));
+        const lastRow = Math.min(rows - 1, Math.floor((ripple.y + ripple.radius + bandWidth) / CELL));
+
+        for (let row = firstRow; row <= lastRow; row++) {
+          for (let col = firstCol; col <= lastCol; col++) {
+            const dist = Math.hypot(
+              col * CELL + CELL / 2 - ripple.x,
+              row * CELL + CELL / 2 - ripple.y
+            );
+            const diff = Math.abs(dist - ripple.radius);
+
+            if (diff < bandWidth) {
+              const fadeOut = 1 - ripple.radius / ripple.maxRadius;
+              const strength = Math.min(1, (1 - diff / bandWidth) * fadeOut * 1.35);
+              const index = row * cols + col;
+              intensity[index] = Math.max(intensity[index], strength);
+            }
+          }
+        }
+
+        if (ripple.radius >= ripple.maxRadius) {
+          ripples.splice(r, 1);
+        } else {
+          alive = true;
+        }
+      }
+
+      // 2. Desvanece os quadrados
       for (let i = 0; i < intensity.length; i++) {
         if (intensity[i] > 0) {
           intensity[i] *= DECAY;
@@ -81,7 +110,6 @@ function GridGlow() {
       }
 
       draw();
-      // Se ainda há quadrados acesos, continua. Senão, o laço PARA.
       frameId = alive ? requestAnimationFrame(tick) : null;
     };
 
@@ -89,9 +117,7 @@ function GridGlow() {
       if (frameId === null) frameId = requestAnimationFrame(tick);
     };
 
-    // ----- Acende os quadrados perto de um ponto (x, y) -----
     const lightUp = (x, y, radius = RADIUS) => {
-      // Só percorremos os quadrados que podem estar no raio (e não a grade toda)
       const firstCol = Math.max(0, Math.floor((x - radius) / CELL));
       const lastCol = Math.min(cols - 1, Math.floor((x + radius) / CELL));
       const firstRow = Math.max(0, Math.floor((y - radius) / CELL));
@@ -99,93 +125,82 @@ function GridGlow() {
 
       for (let row = firstRow; row <= lastRow; row++) {
         for (let col = firstCol; col <= lastCol; col++) {
-          // distância do centro do quadrado até o ponto
           const distance = Math.hypot(
             col * CELL + CELL / 2 - x,
             row * CELL + CELL / 2 - y
           );
 
           if (distance < radius) {
-            // Quanto mais perto, mais forte. O "* 1.4" deixa o centro mais intenso.
             const strength = Math.min(1, (1 - distance / radius) * 1.4);
             const index = row * cols + col;
-            // Math.max: nunca "apaga" um quadrado que já estava mais aceso
             intensity[index] = Math.max(intensity[index], strength);
           }
         }
       }
     };
 
-    // ----- Eventos do ponteiro (mouse, caneta ou toque) -----
-    const handlePointer = (event) => {
+    const handlePointerMove = (event) => {
+      const rect = area.getBoundingClientRect();
+      lightUp(event.clientX - rect.left, event.clientY - rect.top);
+      startLoop();
+    };
+
+    const handlePointerDown = (event) => {
       const rect = area.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      if (reduceMotion) {
-        // Sem rastro: só o que está sob o cursor, desenhado na hora
-        intensity.fill(0);
-        lightUp(x, y);
-        draw();
-      } else {
-        lightUp(x, y);
-        startLoop();
-      }
+      lightUp(x, y);
+      ripples.push({
+        x,
+        y,
+        radius: 0,
+        maxRadius: Math.max(width, height) * 0.55,
+      });
+      startLoop();
     };
 
-    const handleLeave = () => {
-      if (reduceMotion) {
-        intensity.fill(0);
-        draw();
-      }
-      // Sem reduceMotion não precisa fazer nada: o fade apaga sozinho
-    };
+    let initialPulseDone = false;
 
-    // ----- Ajusta o canvas ao tamanho do Hero -----
     const resize = () => {
       const rect = area.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
 
-      // Telas de alta densidade (retina) precisam de mais pixels reais
-      // para o desenho não ficar borrado.
       const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // deve vir DEPOIS de mudar width/height
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       cols = Math.ceil(width / CELL);
       rows = Math.ceil(height / CELL);
       intensity = new Float32Array(cols * rows);
       draw();
+
+      // Dispara uma onda automática no centro ao abrir a página!
+      if (!initialPulseDone && width > 0) {
+        initialPulseDone = true;
+        ripples.push({
+          x: width / 2,
+          y: height / 2,
+          radius: 0,
+          maxRadius: Math.max(width, height) * 0.5,
+        });
+        startLoop();
+      }
     };
 
-    // O ResizeObserver avisa quando o Hero muda de tamanho (e também uma vez
-    // logo ao começar, então não precisamos chamar resize() à mão).
     const observer = new ResizeObserver(resize);
     observer.observe(area);
 
-    // O canvas tem pointer-events: none, então ouvimos o Hero (o "pai").
-    area.addEventListener("pointermove", handlePointer);
-    area.addEventListener("pointerdown", handlePointer);
-    area.addEventListener("pointerleave", handleLeave);
+    area.addEventListener("pointermove", handlePointerMove);
+    area.addEventListener("pointerdown", handlePointerDown);
 
-    // Alternativa para telas sem mouse: quadrados acendem sozinhos, devagar
-    if (noHover && !reduceMotion) {
-      ambientId = setInterval(() => {
-        lightUp(Math.random() * width, Math.random() * height, CELL * 1.3);
-        startLoop();
-      }, 450);
-    }
-
-    // Limpeza: remove tudo quando o componente sair da tela
     return () => {
       observer.disconnect();
-      area.removeEventListener("pointermove", handlePointer);
-      area.removeEventListener("pointerdown", handlePointer);
-      area.removeEventListener("pointerleave", handleLeave);
+      area.removeEventListener("pointermove", handlePointerMove);
+      area.removeEventListener("pointerdown", handlePointerDown);
       if (frameId !== null) cancelAnimationFrame(frameId);
-      if (ambientId !== null) clearInterval(ambientId);
     };
   }, []);
 

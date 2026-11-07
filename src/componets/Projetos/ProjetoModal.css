@@ -11,10 +11,20 @@
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
 }
 
-/* O fundo escurecido atrás da janela é gratuito com <dialog> */
+.modal[open] {
+  animation: modal-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* O fundo escurecido atrás da janela */
 .modal::backdrop {
   background: rgba(5, 8, 13, 0.78);
   backdrop-filter: blur(4px);
+  animation: backdrop-fade 0.3s ease forwards;
+}
+
+@keyframes backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Trava a rolagem da página enquanto o modal está aberto */
@@ -46,17 +56,17 @@ body:has(.modal[open]) {
   cursor: pointer;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), transform 0.25s ease;
 }
 
 .modal__close:hover {
   border-color: var(--color-sky);
+  transform: rotate(90deg) scale(1.08);
 }
 
 .modal__meta {
   margin: 0 0 8px;
   padding-right: 48px;
-  /* não encosta no botão de fechar */
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -88,6 +98,21 @@ body:has(.modal[open]) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-teal);
+}
+
+/* ===== Animação em Cascata (Integrantes, Destaques e Tags) ===== */
+.modal__stagger-item {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: modal-cascade 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(0.1s + var(--stagger-index, 0) * 65ms);
+}
+
+@keyframes modal-cascade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===== Integrantes ===== */
@@ -194,7 +219,6 @@ body:has(.modal[open]) {
 .modal__media-blur {
   position: absolute;
   inset: -24px;
-  /* sobra para o blur não clarear as bordas */
   width: calc(100% + 48px);
   height: calc(100% + 48px);
   object-fit: cover;
@@ -212,19 +236,15 @@ body:has(.modal[open]) {
 /* ===== Curtir no rodapé do modal ===== */
 .modal__like {
   margin-left: auto;
-  /* empurra o botão para a direita */
 }
 
-/* Animação de entrada, só para quem não pediu movimento reduzido */
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(16px) scale(0.96);
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .modal[open] {
-    animation: modal-in 0.25s ease;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

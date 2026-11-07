@@ -8,13 +8,13 @@ import { isSafeImageSrc } from "../../utils/isSafeImageSrc";
 import { getInitials } from "../../utils/getInitials";
 import "./ProjetoModal.css";
 
-function ProjetoModal({ project, onClose }) {
+function ProjetoModal({ project, onClose, liked, onToggleLike }) {
   const dialogRef = useRef(null);
   const titleId = useId();
   const [imageFailed, setImageFailed] = useState(false);
 
   const {
-    title, description, course, turma, tags = [],
+    id, title, description, course, turma, tags = [],
     image, url, repoUrl, advisor, likes = 0,
     members = [], highlights = [],
   } = project;
@@ -52,10 +52,11 @@ function ProjetoModal({ project, onClose }) {
           ×
         </button>
 
-        {/* Foto grande: a MESMA imagem duas vezes.
-            Atrás, desfocada e preenchendo tudo; na frente, nítida e inteira. */}
         {showImage && (
-          <div className="modal__media">
+          <div
+            className="modal__media"
+            style={id ? { viewTransitionName: `project-cover-${id}` } : undefined}
+          >
             <img
               src={image}
               alt=""
@@ -84,8 +85,12 @@ function ProjetoModal({ project, onClose }) {
             <section className="modal__section">
               <h3 className="modal__heading">Integrantes</h3>
               <ul className="modal__members">
-                {members.map((member) => (
-                  <li key={member.name} className="modal__member">
+                {members.map((member, index) => (
+                  <li
+                    key={member.name}
+                    className="modal__member modal__stagger-item"
+                    style={{ "--stagger-index": index }}
+                  >
                     <span className="modal__avatar" aria-hidden="true">
                       {getInitials(member.name)}
                     </span>
@@ -97,7 +102,10 @@ function ProjetoModal({ project, onClose }) {
                 ))}
               </ul>
               {advisor && (
-                <p className="modal__advisor">
+                <p
+                  className="modal__advisor modal__stagger-item"
+                  style={{ "--stagger-index": members.length }}
+                >
                   Orientação: <strong>{advisor}</strong>
                 </p>
               )}
@@ -108,8 +116,14 @@ function ProjetoModal({ project, onClose }) {
             <section className="modal__section">
               <h3 className="modal__heading">Destaques</h3>
               <ul className="modal__highlights">
-                {highlights.map((item) => (
-                  <li key={item}>{item}</li>
+                {highlights.map((item, index) => (
+                  <li
+                    key={item}
+                    className="modal__stagger-item"
+                    style={{ "--stagger-index": members.length + 1 + index }}
+                  >
+                    {item}
+                  </li>
                 ))}
               </ul>
             </section>
@@ -118,8 +132,14 @@ function ProjetoModal({ project, onClose }) {
           <section className="modal__section">
             <h3 className="modal__heading">Tecnologias</h3>
             <ul className="modal__tags">
-              {tags.map((tag) => (
-                <li key={tag}>
+              {tags.map((tag, index) => (
+                <li
+                  key={tag}
+                  className="modal__stagger-item"
+                  style={{
+                    "--stagger-index": members.length + highlights.length + 2 + index,
+                  }}
+                >
                   <Tag color={getTechColor(tag)}>{tag}</Tag>
                 </li>
               ))}
@@ -138,7 +158,12 @@ function ProjetoModal({ project, onClose }) {
               </Button>
             )}
             <div className="modal__like">
-              <LikeButton count={likes} subject={title} />
+              <LikeButton
+                count={likes + (liked ? 1 : 0)}
+                liked={liked}
+                onToggle={onToggleLike}
+                subject={title}
+              />
             </div>
           </div>
         </div>
