@@ -1,4 +1,5 @@
-import { projects, TURMAS } from "../../data/sites";
+import { useEffect, useState } from "react";
+import { obterEstatisticas } from "../../services/projetosService";
 import Button from "../ui/Button";
 import Tag from "../ui/Tag";
 
@@ -23,7 +24,6 @@ export function Sumario({ chapters, onSelect }) {
       <ol className="toc">
         {chapters.map((chapter) => (
           <li key={chapter.numeral}>
-            {/* onSelect é uma função que vem do pai (Sobre.jsx) */}
             <button
               type="button"
               className="toc__item"
@@ -118,7 +118,6 @@ export function CapMantenedores() {
       <ul className="chips">
         {["Feito por alunos", "Mantido por alunos", "Para os alunos"].map((text) => (
           <li key={text}>
-            {/* Reaproveitando o Tag, passando uma cor da nossa paleta */}
             <Tag color="var(--color-teal)">{text}</Tag>
           </li>
         ))}
@@ -129,31 +128,51 @@ export function CapMantenedores() {
 
 /* ---------- Spread 2, direita: Cap. IV ---------- */
 export function CapNumeros() {
-  // Valores DERIVADOS dos dados: quando um projeto novo entra em sites.js,
-  // estes números se atualizam sozinhos.
-  const stats = [
-    { label: "Projetos", value: projects.length },
-    { label: "Turmas", value: TURMAS.length },
-    // Set remove repetidos: conta tecnologias únicas
-    { label: "Tecnologias", value: new Set(projects.flatMap((p) => p.tags)).size },
-    {
-      label: "Integrantes",
-      value: projects.reduce((total, p) => total + (p.members?.length ?? 0), 0),
-    },
+  const [dados, setDados] = useState(null);
+  const [status, setStatus] = useState("loading"); // "loading" | "error" | "ready"
+
+  useEffect(() => {
+    let cancelado = false;
+
+    obterEstatisticas()
+      .then((resultado) => {
+        if (cancelado) return;
+        setDados(resultado);
+        setStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelado) setStatus("error");
+      });
+
+    return () => { cancelado = true; };
+  }, []);
+
+  const stats = dados && [
+    { label: "Projetos", value: dados.projetos },
+    { label: "Turmas", value: dados.turmas },
+    { label: "Tecnologias", value: dados.tecnologias },
+    { label: "Integrantes", value: dados.integrantes },
   ];
 
   return (
     <Capitulo numeral="IV" title="Em números">
-      <p>O acervo hoje, contado direto dos dados do site:</p>
-
-      <dl className="stats">
-        {stats.map((stat) => (
-          <div key={stat.label} className="stats__item">
-            <dt>{stat.label}</dt>
-            <dd>{stat.value}</dd>
-          </div>
-        ))}
-      </dl>
+      {status === "loading" && <p>Carregando números…</p>}
+      {status === "error" && (
+        <p role="alert">Não foi possível carregar os números agora.</p>
+      )}
+      {status === "ready" && (
+        <>
+          <p>O acervo hoje, contado direto do banco de dados:</p>
+          <dl className="stats">
+            {stats.map((stat) => (
+              <div key={stat.label} className="stats__item">
+                <dt>{stat.label}</dt>
+                <dd>{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )}
     </Capitulo>
   );
 }
@@ -183,7 +202,6 @@ export function CapComoFunciona() {
   );
 }
 
-/* ---------- Spread 3, direita: Página final ---------- */
 export function PaginaFinal({ onRestart }) {
   return (
     <div className="ending">
@@ -196,7 +214,6 @@ export function PaginaFinal({ onRestart }) {
 
       <div className="ending__actions">
         <Button to="/#projetos" variant="primary">Explorar projetos</Button>
-        {/* Sem href, o nosso Button vira um <button> de verdade */}
         <Button variant="ghost" onClick={onRestart}>Reler o livro</Button>
       </div>
     </div>
