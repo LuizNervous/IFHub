@@ -63,3 +63,12 @@ export async function obterEstatisticas() {
     integrantes: integrantes.count,
   };
 }
+export async function listarTecnologias() {
+  const { data, error } = await supabase
+    .from("tecnologias")
+    .select("nome")
+    .order("nome");
+
+  if (error) throw error;
+  return data.map((t) => t.nome);
+}

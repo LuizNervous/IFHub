@@ -3,6 +3,7 @@ import Layout from "./componets/Layout/Layout";
 import HomePage from "./pages/HomePage";
 import SobrePage from "./pages/SobrePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdicionarSitePage from "./pages/AdicionarSitePage";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="sobre" element={<SobrePage />} />
+        <Route path="adicionar-site" element={<AdicionarSitePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

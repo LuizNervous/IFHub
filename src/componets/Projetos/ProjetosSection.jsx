@@ -6,6 +6,7 @@ import FilterBar from "../ui/FilterBar";
 import ProjetoCard from "./ProjetoCard";
 import "./ProjetosSection.css";
 import { projects as fallbackProjects, TURMAS as fallbackTurmas } from "../../data/sites";
+import Button from "../ui/Button";
 
 const ALL = "Todos";
 
@@ -90,6 +91,9 @@ function ProjetosSection() {
             Trabalhos desenvolvidos pelos alunos do curso de Informática,
             reunidos em um só lugar.
           </p>
+          <div className="projects__cta">
+            <Button to="/adicionar-site" variant="ghost">+ Adicione seu site</Button>
+          </div>
         </header>
 
         {status === "ready" && (

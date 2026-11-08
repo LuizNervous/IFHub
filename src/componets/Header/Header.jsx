@@ -47,7 +47,7 @@ function Header() {
           </nav>
 
           <div className="header__actions">
-            <Button href="#admin" variant="ghost">Área restrita</Button>
+            <Button to="/adicionar-site" variant="primary">+ Adicione seu site</Button>
             <Button to="/#projetos" variant="primary">Explorar projetos</Button>
           </div>
         </div>

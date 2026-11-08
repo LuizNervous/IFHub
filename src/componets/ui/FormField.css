@@ -1,0 +1,143 @@
+.field {
+  --field-error: #f87171;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0; /* deixa o campo encolher dentro de grids sem estourar */
+}
+
+.field__label {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.field__required {
+  color: var(--color-teal);
+}
+
+.field__optional {
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+/* ===== O campo em si (input, textarea e select) ===== */
+.field__control {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 0.97rem;
+  color: var(--color-white);
+  color-scheme: dark; /* faz a lista do <select> e o autofill respeitarem o tema escuro */
+  background: rgba(5, 8, 13, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  transition: border-color var(--transition), box-shadow var(--transition),
+    background var(--transition);
+}
+
+.field__control::placeholder {
+  color: color-mix(in srgb, var(--color-muted) 65%, transparent);
+}
+
+textarea.field__control {
+  min-height: 140px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+select.field__control {
+  appearance: none;
+  padding-right: 42px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239db2c9' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.field__control:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-sky) 40%, var(--color-border));
+}
+
+/* Foco: brilho suave (o outline padrão do site é trocado por algo mais bonito, mas continua bem visível) */
+.field__control:focus-visible {
+  outline: none;
+  border-color: var(--color-teal);
+  background: rgba(5, 8, 13, 0.85);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-teal) 28%, transparent);
+}
+
+.field__control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ===== Estado de erro ===== */
+.field.has-error .field__control {
+  border-color: var(--field-error);
+}
+
+.field.has-error .field__control:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--field-error) 28%, transparent);
+}
+
+/* ===== Rodapé do campo: dica/erro à esquerda, contador à direita ===== */
+.field__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 1.1em;
+}
+
+.field__hint,
+.field__error {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.field__hint {
+  color: var(--color-muted);
+}
+
+.field__error {
+  color: var(--field-error);
+  animation: field-error-in 0.25s ease;
+}
+
+.field__counter {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+
+@keyframes field-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field__control,
+  .field__error {
+    transition: none;
+    animation: none;
+  }
+}
