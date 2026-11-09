@@ -1,0 +1,118 @@
+.add-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 100%;
+  min-height: 380px;
+  padding: 32px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-teal) 14%, transparent), transparent 70%),
+    var(--color-surface);
+  border: 2px dashed color-mix(in srgb, var(--color-teal) 45%, transparent);
+  border-radius: 18px;
+  transition: transform var(--transition), border-color var(--transition),
+    box-shadow var(--transition), background var(--transition);
+}
+
+/* O foco global arredonda em 6px; o card precisa manter a própria curvatura */
+.add-card:focus-visible {
+  border-radius: 18px;
+}
+
+.add-card:hover,
+.add-card:focus-visible {
+  transform: translateY(-6px);
+  border-color: var(--color-sky);
+  box-shadow: 0 20px 48px color-mix(in srgb, var(--color-sky) 16%, transparent);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-sky) 18%, transparent), transparent 70%),
+    var(--color-surface);
+}
+
+.add-card__plus {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 6px;
+  color: var(--color-teal);
+  background: color-mix(in srgb, var(--color-teal) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-teal) 55%, transparent);
+  border-radius: 50%;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), color var(--transition),
+    background var(--transition);
+  animation: add-card-ring 2.8s ease-out infinite;
+}
+
+.add-card__plus svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.add-card:hover .add-card__plus,
+.add-card:focus-visible .add-card__plus {
+  transform: rotate(90deg) scale(1.1);
+  color: var(--color-black);
+  background: var(--color-green);
+}
+
+.add-card__title {
+  max-width: 260px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.add-card__text {
+  max-width: 280px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+.add-card__action {
+  margin-top: 6px;
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-teal);
+  border: 1px solid color-mix(in srgb, var(--color-teal) 50%, transparent);
+  border-radius: 999px;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.add-card:hover .add-card__action,
+.add-card:focus-visible .add-card__action {
+  color: var(--color-black);
+  background: var(--color-green);
+  border-color: var(--color-green);
+}
+
+/* Um anel que se expande devagar ao redor do "+", como um convite silencioso */
+@keyframes add-card-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-teal) 40%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 22px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-card,
+  .add-card__plus,
+  .add-card__action {
+    transition: none;
+    animation: none;
+  }
+}

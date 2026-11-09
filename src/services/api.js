@@ -1,3 +1,9 @@
+// api.js
+// ÚNICO lugar do front-end que conversa com a Edge Function "enviar-projeto".
+// Se o endereço ou o formato da resposta mudar, só este arquivo precisa mudar.
+//
+// Repare: aqui NÃO há nenhuma chave secreta. O endereço é público; quem protege
+// o envio é o servidor (limite de tentativas, validação, anti-robô).
 
 const URL_ENVIO = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enviar-projeto`;
 
@@ -10,7 +16,12 @@ function textoDeEspera(segundos) {
   return `${horas} ${horas === 1 ? "hora" : "horas"}`;
 }
 
-
+/**
+ * Envia o projeto. NUNCA lança erro: sempre devolve um objeto padronizado:
+ *   { ok: true }
+ *   { ok: false, codigo, mensagem, erros }   // erros = { campo: "mensagem" }
+ * Assim o resto do código só precisa olhar `resultado.ok`.
+ */
 export async function enviarProjeto(corpo) {
   let resposta;
   try {
@@ -18,7 +29,7 @@ export async function enviarProjeto(corpo) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(corpo),
-      signal: AbortSignal.timeout(15000), // não deixa o usuário esperando para sempre
+      signal: AbortSignal.timeout(30000), // há uma imagem no envio; mesmo assim não esperamos para sempre
     });
   } catch {
     return {

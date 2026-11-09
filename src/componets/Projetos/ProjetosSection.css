@@ -62,4 +62,16 @@
   text-align: center;
   color: var(--color-muted);
 }
-.projects__cta { margin-top: 20px; }
+
+.projects__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.projects__cta-hint {
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}

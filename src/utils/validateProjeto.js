@@ -88,6 +88,8 @@ export function validarProjeto(v) {
   marcar("repo_url", erroRepo);
   if (!linha(v.site_url) && !linha(v.repo_url)) erros.site_url = MSG_PRECISA_LINK;
 
+  if (!v.imagem) erros.imagem = "Envie o print da tela inicial do site.";
+
   if (v.tecnologias.length < LIMITES.tecnologias.min) {
     erros.tecnologias = "Escolha ao menos uma tecnologia.";
   } else if (v.tecnologias.length > LIMITES.tecnologias.max) {

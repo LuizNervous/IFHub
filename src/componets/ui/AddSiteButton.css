@@ -1,0 +1,180 @@
+/* O ângulo da borda de luz é uma "propriedade registrada": só assim o navegador consegue
+   ANIMAR um valor dentro de um gradiente. (Em navegadores antigos a borda fica parada, sem quebrar nada.) */
+@property --cta-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: true;
+}
+
+.cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 999px;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+
+/* O foco global do site arredonda em 6px; aqui precisamos manter a pílula inteira */
+.cta:focus-visible {
+  border-radius: 999px;
+}
+
+.cta__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cta__icon svg {
+  width: 58%;
+  height: 58%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.cta:hover .cta__icon {
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ===================================================
+   VARIANTE "nav" (header): escura, com borda de luz girando
+   =================================================== */
+.cta--nav {
+  --cta-angle: 0deg;
+
+  padding: 7px 18px 7px 7px;
+  font-size: 0.93rem;
+  color: var(--color-white);
+  border: 1.5px solid transparent;
+  /* Duas camadas de fundo: o miolo escuro (padding-box) e o gradiente que aparece só na borda (border-box) */
+  background:
+    linear-gradient(var(--color-black), var(--color-black)) padding-box,
+    conic-gradient(
+      from var(--cta-angle),
+      var(--color-green),
+      var(--color-sky),
+      var(--color-teal),
+      var(--color-green)
+    ) border-box;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-teal) 22%, transparent);
+  animation: cta-orbit 6s linear infinite;
+}
+
+.cta--nav .cta__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-black);
+  background: linear-gradient(135deg, var(--color-green), var(--color-teal));
+}
+
+.cta--nav:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--color-teal) 45%, transparent);
+}
+
+@keyframes cta-orbit {
+  to {
+    --cta-angle: 360deg;
+  }
+}
+
+/* No menu do celular o botão ocupa a largura toda */
+.header__actions .cta {
+  width: auto;
+}
+
+@media (max-width: 860px) {
+  .header__actions .cta {
+    width: 100%;
+    padding: 12px 18px;
+  }
+}
+
+/* ===================================================
+   VARIANTE "large" (seção de projetos): verde, com brilho atravessando
+   =================================================== */
+.cta--large {
+  overflow: hidden;
+  padding: 13px 26px 13px 13px;
+  font-size: 1.05rem;
+  color: var(--color-black);
+  background: linear-gradient(135deg, var(--color-green), var(--color-teal));
+  box-shadow:
+    0 10px 32px color-mix(in srgb, var(--color-green) 28%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.cta--large > * {
+  position: relative;
+  z-index: 1; /* mantém o texto acima do brilho */
+}
+
+.cta--large .cta__icon {
+  width: 36px;
+  height: 36px;
+  color: var(--color-green);
+  background: var(--color-black);
+}
+
+/* O brilho: uma faixa clara e inclinada que cruza o botão de tempos em tempos */
+.cta--large::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+  transform: translateX(-130%);
+  animation: cta-shine 5s ease-in-out infinite;
+}
+
+.cta--large:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 14px 40px color-mix(in srgb, var(--color-green) 42%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.cta__arrow {
+  font-size: 1.2rem;
+  transition: transform 0.25s ease;
+}
+
+.cta:hover .cta__arrow {
+  transform: translateX(5px);
+}
+
+@keyframes cta-shine {
+  0%,
+  55% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+/* Quem prefere menos movimento: tudo fica parado e continua bonito */
+@media (prefers-reduced-motion: reduce) {
+  .cta--nav,
+  .cta--large::before {
+    animation: none;
+  }
+
+  .cta__icon,
+  .cta__arrow,
+  .cta {
+    transition: none;
+  }
+
+  .cta:hover .cta__icon {
+    transform: none;
+  }
+}

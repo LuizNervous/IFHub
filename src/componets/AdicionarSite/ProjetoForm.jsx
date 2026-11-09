@@ -4,14 +4,15 @@ import FormSection from "./FormSection";
 import TecnologiasPicker from "./TecnologiasPicker";
 import MembrosFieldset from "./MembrosFieldset";
 import DestaquesFieldset from "./DestaquesFieldset";
+import ImagemUpload from "./ImagemUpload";
 import { LIMITES } from "../../utils/validateProjeto";
 
 // O formulário em si. Ele NÃO guarda estado: recebe tudo pronto do hook (prop `form`)
 // e das listas de opções (prop `opcoes`). Só desenha e liga os eventos.
 function ProjetoForm({ form, opcoes }) {
   const {
-    valores, erros, status, erroGeral,
-    setCampo, validarAoSair, toggleTecnologia,
+    valores, erros, status, erroGeral, processandoImagem,
+    setCampo, validarAoSair, toggleTecnologia, selecionarImagem, removerImagem,
     adicionarIntegrante, removerIntegrante, alterarIntegrante,
     adicionarDestaque, removerDestaque, alterarDestaque,
     enviar,
@@ -125,7 +126,21 @@ function ProjetoForm({ form, opcoes }) {
         </div>
       </FormSection>
 
-      <FormSection number={3} title="Tecnologias" description="O que foi usado para construir o projeto.">
+      <FormSection
+        number={3}
+        title="Print da tela inicial"
+        description="Uma captura da página inicial do seu projeto. Ela vira a capa do seu card no IFHub."
+      >
+        <ImagemUpload
+          imagem={valores.imagem}
+          erro={erros.imagem}
+          processando={processandoImagem}
+          onSelecionar={selecionarImagem}
+          onRemover={removerImagem}
+        />
+      </FormSection>
+
+      <FormSection number={4} title="Tecnologias" description="O que foi usado para construir o projeto.">
         <TecnologiasPicker
           opcoes={opcoes.tecnologias}
           selecionadas={valores.tecnologias}
@@ -135,7 +150,7 @@ function ProjetoForm({ form, opcoes }) {
         />
       </FormSection>
 
-      <FormSection number={4} title="A equipe" description="Quem participou do projeto.">
+      <FormSection number={5} title="A equipe" description="Quem participou do projeto.">
         <MembrosFieldset
           membros={valores.integrantes}
           erros={erros}
@@ -147,7 +162,7 @@ function ProjetoForm({ form, opcoes }) {
       </FormSection>
 
       <FormSection
-        number={5}
+        number={6}
         title="Destaques"
         description="Conquistas e diferenciais. Esta etapa é opcional, mas deixa o projeto mais interessante."
       >
@@ -162,7 +177,7 @@ function ProjetoForm({ form, opcoes }) {
       </FormSection>
 
       <FormSection
-        number={6}
+        number={7}
         title="Seu contato"
         description="Usamos este e-mail apenas para falar com você sobre o envio. Ele nunca aparece no site."
       >
@@ -200,7 +215,7 @@ function ProjetoForm({ form, opcoes }) {
       )}
 
       <div className="project-form__submit">
-        <Button type="submit" variant="primary" disabled={enviando || semOpcoes} aria-busy={enviando}>
+        <Button type="submit" variant="primary" disabled={enviando || semOpcoes || processandoImagem} aria-busy={enviando}>
           {enviando ? (
             <>
               <span className="spinner" aria-hidden="true" />

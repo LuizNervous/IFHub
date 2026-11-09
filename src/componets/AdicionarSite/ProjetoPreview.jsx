@@ -18,7 +18,7 @@ function ProjetoPreview({ valores }) {
         "A descrição do seu projeto aparece aqui. Conte, em poucas linhas, o que ele faz e para quem.",
       course: "Informática",
       turma: valores.turma || "Turma",
-      image: null, // imagens ficam para uma etapa futura (upload exige cuidados extras de segurança)
+      image: valores.imagem?.previewUrl ?? null, // a prévia local da imagem escolhida (ou o desenho padrão)
       url: isSafeUrl(site) ? site : undefined,
       repoUrl: isSafeUrl(repo) ? repo : undefined,
       tags: valores.tecnologias,

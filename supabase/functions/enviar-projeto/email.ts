@@ -1,4 +1,10 @@
-
+// email.ts
+// Avisa os administradores que existe um projeto pendente.
+//
+// Regras de segurança deste e-mail:
+//  - todo texto vindo do visitante passa por escaparHtml();
+//  - os links enviados pelo aluno aparecem como TEXTO, nunca como link clicável;
+//  - NÃO existe link de "aprovar": a aprovação só acontece num painel com login.
 
 import { escaparHtml } from "./utils.ts";
 
@@ -10,6 +16,7 @@ export interface ResumoProjeto {
   totalIntegrantes: number;
   site_url?: string;
   repo_url?: string;
+  imagem_url: string; // endereço do NOSSO bucket (gerado pelo servidor, nunca pelo usuário)
 }
 
 function lerConfiguracao() {
@@ -35,6 +42,7 @@ export async function notificarAdmins(r: ResumoProjeto): Promise<void> {
     ["Integrantes", String(r.totalIntegrantes)],
     ["Site", r.site_url ?? "—"],
     ["Repositório", r.repo_url ?? "—"],
+    ["Imagem (print)", r.imagem_url],
     ["ID do projeto", String(r.id)],
   ];
 

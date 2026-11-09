@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import { limparLinha, limparParagrafos, normalizarUrl } from "./utils.ts";
+import { MAX_BASE64 } from "./jpegSeguro.ts";
 
 // "" vira "campo não enviado" (undefined) nos campos opcionais.
 const vazioViraUndefined = (valor: unknown) =>
@@ -105,11 +106,19 @@ const emailContato = z
       .email("Informe um e-mail válido."),
   );
 
-/** O CORPO da requisição: projeto + e-mail + os dois campos anti-robô. */
+// A imagem chega como texto base64 (sem o prefixo "data:..."). Aqui só conferimos o formato
+// e o tamanho do TEXTO; o conteúdo da imagem é verificado a fundo em imagem.ts.
+const imagem = z
+  .string({ required_error: "Envie o print da tela inicial do site." })
+  .min(100, "Envie o print da tela inicial do site.")
+  .max(MAX_BASE64, "A imagem é grande demais.");
+
+/** O CORPO da requisição: projeto + e-mail + imagem + os dois campos anti-robô. */
 export const CorpoSchema = z
   .object({
     projeto: ProjetoSchema,
     email_contato: emailContato,
+    imagem,
     hp: z.string().max(200).optional(), // honeypot: um humano nunca preenche
     tempo_ms: z.number().finite().optional(), // quanto tempo o formulário ficou aberto
   })

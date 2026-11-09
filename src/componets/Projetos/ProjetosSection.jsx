@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { listarProjetos, listarTurmas } from "../../services/projetosService";
 import FilterBar from "../ui/FilterBar";
+import AddSiteButton from "../ui/AddSiteButton";
 import ProjetoCard from "./ProjetoCard";
+import AddSiteCard from "./AddSiteCard";
 import "./ProjetosSection.css";
 import { projects as fallbackProjects, TURMAS as fallbackTurmas } from "../../data/sites";
-import Button from "../ui/Button";
 
 const ALL = "Todos";
 
@@ -91,8 +92,12 @@ function ProjetosSection() {
             Trabalhos desenvolvidos pelos alunos do curso de Informática,
             reunidos em um só lugar.
           </p>
+
           <div className="projects__cta">
-            <Button to="/adicionar-site" variant="ghost">+ Adicione seu site</Button>
+            <AddSiteButton variant="large" />
+            <span className="projects__cta-hint">
+              Leva poucos minutos · revisado por um administrador
+            </span>
           </div>
         </header>
 
@@ -109,13 +114,17 @@ function ProjetosSection() {
         )}
         {status === "ready" &&
           (count === 0 ? (
-            <p className="projects__empty">
-              {selectedTurma === ALL
-                ? "Nenhum projeto cadastrado ainda."
-                : `Nenhum projeto da turma ${selectedTurma} cadastrado ainda.`}
-            </p>
+            <div className="projects__empty">
+              <p>
+                {selectedTurma === ALL
+                  ? "Nenhum projeto cadastrado ainda."
+                  : `Nenhum projeto da turma ${selectedTurma} cadastrado ainda.`}
+              </p>
+              <AddSiteButton variant="large">Seja o primeiro a adicionar</AddSiteButton>
+            </div>
           ) : (
             <ul className="projects__grid">
+              {/* Um <li> por projeto. Cada <li> contém UM card, e só um. */}
               {visibleProjects.map((project, index) => (
                 <li
                   key={`${selectedTurma}-${project.id}`}
@@ -128,6 +137,11 @@ function ProjetosSection() {
                   <ProjetoCard project={project} />
                 </li>
               ))}
+
+              {/* O card-convite é o ÚLTIMO <li> da grade: um item irmão dos projetos, não filho de um deles. */}
+              <li className="projects__grid-item" style={{ "--card-index": count }}>
+                <AddSiteCard />
+              </li>
             </ul>
           ))}
       </div>

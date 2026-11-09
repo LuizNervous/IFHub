@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { enviarProjeto } from "../services/api";
+import { prepararImagem } from "../utils/prepararImagem";
 import { LIMITES, MSG_PRECISA_LINK, montarPayload, validarProjeto } from "../utils/validateProjeto";
 
 // Cada linha de uma lista dinâmica precisa de um id ESTÁVEL para o React usar como `key`.
@@ -20,6 +21,7 @@ function valoresIniciais() {
     tecnologias: [],
     integrantes: [novoIntegrante()],
     destaques: [],
+    imagem: null, // { base64, previewUrl, nome, tamanho } depois de preparada
     email_contato: "",
     hp: "", // "honeypot": campo-isca escondido. Humanos nunca preenchem.
   };
@@ -38,6 +40,20 @@ export function useProjetoForm() {
   const [status, setStatus] = useState("preenchendo"); // "preenchendo" | "enviando" | "enviado"
   const [erroGeral, setErroGeral] = useState("");
   const [abertoEm] = useState(() => Date.now()); // para o anti-robô medir o tempo de preenchimento
+  const [processandoImagem, setProcessandoImagem] = useState(false);
+
+  // A prévia da imagem é um "blob:" que ocupa memória. Guardamos o endereço mais recente
+  // para liberá-lo quando o usuário sair da página.
+  const previewAtual = useRef(null);
+  useEffect(() => {
+    previewAtual.current = valores.imagem?.previewUrl ?? null;
+  });
+  useEffect(
+    () => () => {
+      if (previewAtual.current) URL.revokeObjectURL(previewAtual.current);
+    },
+    [],
+  );
 
   // ---------- erros ----------
   const limparErro = (chave) =>
@@ -84,6 +100,28 @@ export function useProjetoForm() {
       return { ...anterior, tecnologias: [...anterior.tecnologias, nome] };
     });
     limparErro("tecnologias");
+  };
+
+  // ---------- imagem ----------
+  const selecionarImagem = async (arquivo) => {
+    if (processandoImagem) return;
+    setProcessandoImagem(true);
+    limparErro("imagem");
+    try {
+      const preparada = await prepararImagem(arquivo);
+      if (valores.imagem?.previewUrl) URL.revokeObjectURL(valores.imagem.previewUrl);
+      setValores((anterior) => ({ ...anterior, imagem: preparada }));
+    } catch (erro) {
+      // prepararImagem lança Errors com mensagens já amigáveis
+      setErros((anterior) => ({ ...anterior, imagem: erro.message }));
+    } finally {
+      setProcessandoImagem(false);
+    }
+  };
+
+  const removerImagem = () => {
+    if (valores.imagem?.previewUrl) URL.revokeObjectURL(valores.imagem.previewUrl);
+    setValores((anterior) => ({ ...anterior, imagem: null }));
   };
 
   // ---------- integrantes ----------
@@ -137,7 +175,7 @@ export function useProjetoForm() {
   // ---------- envio ----------
   const enviar = async (evento) => {
     evento.preventDefault(); // impede o navegador de recarregar a página
-    if (status === "enviando") return; // protege contra clique duplo
+    if (status === "enviando" || processandoImagem) return; // protege contra clique duplo
 
     setErroGeral("");
 
@@ -160,6 +198,7 @@ export function useProjetoForm() {
     const resultado = await enviarProjeto({
       projeto: montarPayload(limpos),
       email_contato: limpos.email_contato.trim(),
+      imagem: limpos.imagem.base64,
       hp: limpos.hp,
       tempo_ms: Date.now() - abertoEm,
     });
@@ -177,6 +216,7 @@ export function useProjetoForm() {
   };
 
   const reiniciar = () => {
+    if (valores.imagem?.previewUrl) URL.revokeObjectURL(valores.imagem.previewUrl);
     setValores(valoresIniciais());
     setErros({});
     setErroGeral("");
@@ -188,9 +228,12 @@ export function useProjetoForm() {
     erros,
     status,
     erroGeral,
+    processandoImagem,
     setCampo,
     validarAoSair,
     toggleTecnologia,
+    selecionarImagem,
+    removerImagem,
     adicionarIntegrante,
     removerIntegrante,
     alterarIntegrante,

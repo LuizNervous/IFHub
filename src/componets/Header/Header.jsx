@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Logo from "../ui/Logo";
 import Button from "../ui/Button";
 import "./Header.css";
+import AddSiteButton from "../ui/AddSiteButton";
 
 const NAV_ITEMS = [
   { label: "Início", to: "/" },
@@ -47,7 +48,7 @@ function Header() {
           </nav>
 
           <div className="header__actions">
-            <Button to="/adicionar-site" variant="primary">+ Adicione seu site</Button>
+            <AddSiteButton onClick={closeMenu} />
             <Button to="/#projetos" variant="primary">Explorar projetos</Button>
           </div>
         </div>

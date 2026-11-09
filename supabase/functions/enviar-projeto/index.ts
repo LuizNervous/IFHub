@@ -4,14 +4,20 @@
 //   1. origem permitida (CORS)  →  2. método e tipo do conteúdo
 //   3. rate limit por IP (no banco)  →  4. corpo com tamanho máximo
 //   5. anti-robô (honeypot + tempo)  →  6. validação estrita (Zod)
-//   7. gravação atômica (função SQL; status fixo "pendente")  →  8. e-mail aos admins
+//   7. imagem: valida, reconstrói e guarda no Storage (nome aleatório gerado AQUI)
+//   8. gravação atômica (função SQL; status fixo "pendente")  →  9. e-mail aos admins
+//   Se algo falhar depois do passo 7, a imagem é apagada (nada de lixo no Storage).
 
 import { createClient } from "@supabase/supabase-js";
 import { CorpoSchema, formatarErros } from "./validacao.ts";
 import { hmacHex, obterIp } from "./utils.ts";
 import { notificarAdmins } from "./email.ts";
+import { ErroImagem, processarImagem } from "./imagem.ts";
+import { MAX_BASE64 } from "./jpegSeguro.ts";
 
-const MAX_CORPO_BYTES = 20 * 1024; // 20 KB é muito mais do que o formulário precisa
+const BUCKET = "projetos";
+// O texto do formulário cabe em poucos KB; o resto do limite é para a imagem em base64.
+const MAX_CORPO_BYTES = MAX_BASE64 + 64 * 1024;
 const TEMPO_MINIMO_MS = 3000; // um humano não preenche o formulário em menos de 3 s
 
 // Segredos e configurações vêm do ambiente (Supabase → Edge Functions → Secrets).
@@ -131,6 +137,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return responder(500, { ok: false, codigo: "ERRO_INTERNO", mensagem: "Erro interno. Tente novamente mais tarde." });
   }
 
+  // Controle da imagem: se o projeto não chegar a ser criado, a imagem guardada é apagada.
+  let caminhoImagem: string | null = null;
+  let projetoCriado = false;
+
   try {
     // 3) Rate limit: 7 por 15 min e 15 por dia, por IP. Guardamos o HASH do IP, nunca o IP.
     const ipHash = await hmacHex(IP_HASH_SECRET, obterIp(req));
@@ -170,10 +180,39 @@ Deno.serve(async (req: Request): Promise<Response> => {
       });
     }
     const { projeto, email_contato } = resultado.data;
+    const imagem = (bruto as { imagem: string }).imagem;
 
-    // 7) Gravação atômica. O status "pendente" está dentro da função SQL, não aqui.
+    // 7) Imagem: valida a estrutura, RECONSTRÓI os pixels e só então guarda.
+    //    O nome do arquivo é gerado aqui (UUID aleatório): o usuário não escolhe nada, e como o
+    //    servidor nunca devolve esse endereço, ninguém consegue "adivinhar" a imagem de um pendente.
+    let bytesImagem: Uint8Array;
+    try {
+      bytesImagem = processarImagem(imagem);
+    } catch (erroImg) {
+      if (erroImg instanceof ErroImagem) {
+        return responder(422, {
+          ok: false,
+          codigo: "VALIDACAO",
+          mensagem: "Confira os campos destacados.",
+          erros: { imagem: erroImg.mensagem },
+        });
+      }
+      throw erroImg;
+    }
+
+    const caminho = `${crypto.randomUUID()}.jpg`;
+    const { error: erroUpload } = await supabase.storage.from(BUCKET).upload(caminho, bytesImagem, {
+      contentType: "image/jpeg",
+      upsert: false, // nunca sobrescreve um arquivo existente
+      cacheControl: "31536000",
+    });
+    if (erroUpload) throw erroUpload;
+    caminhoImagem = caminho;
+    const imagemUrl = supabase.storage.from(BUCKET).getPublicUrl(caminho).data.publicUrl;
+
+    // 8) Gravação atômica. O status "pendente" está dentro da função SQL, não aqui.
     const { data: projetoId, error: erroBanco } = await supabase.rpc("criar_projeto_pendente", {
-      p: projeto,
+      p: { ...projeto, imagem_url: imagemUrl },
       p_email: email_contato,
       p_ip_hash: ipHash,
       p_user_agent: (req.headers.get("user-agent") ?? "").slice(0, 300),
@@ -199,7 +238,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    // 8) Aviso aos admins. O projeto JÁ está salvo: se o e-mail falhar, o envio continua válido.
+    projetoCriado = true; // a partir daqui a imagem pertence a um projeto e NÃO deve ser apagada
+
+    // 9) Aviso aos admins. O projeto JÁ está salvo: se o e-mail falhar, o envio continua válido.
     try {
       await notificarAdmins({
         id: projetoId as number,
@@ -209,6 +250,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         totalIntegrantes: projeto.integrantes.length,
         site_url: projeto.site_url,
         repo_url: projeto.repo_url,
+        imagem_url: imagemUrl,
       });
       await supabase
         .from("projeto_submissoes")
@@ -226,5 +268,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
     registrarErro("ERRO_INTERNO", erro);
     return responder(500, { ok: false, codigo: "ERRO_INTERNO", mensagem: "Erro interno. Tente novamente mais tarde." });
+  } finally {
+    // Limpeza: imagem guardada, mas o projeto não foi criado (duplicado, erro no banco etc.).
+    if (caminhoImagem && !projetoCriado) {
+      try {
+        await supabase.storage.from(BUCKET).remove([caminhoImagem]);
+      } catch (erroLimpeza) {
+        registrarErro("LIMPEZA_IMAGEM_FALHOU", erroLimpeza);
+      }
+    }
   }
 });
