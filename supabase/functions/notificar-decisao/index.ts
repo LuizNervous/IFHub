@@ -1,4 +1,5 @@
 // supabase/functions/notificar-decisao/index.ts
+// deno-lint-ignore-file
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "npm:nodemailer@6.9.13";
 

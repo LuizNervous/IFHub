@@ -6,6 +6,7 @@
 //  - os links enviados pelo aluno aparecem como TEXTO, nunca como link clicável;
 //  - NÃO existe link de "aprovar": a aprovação só acontece num painel com login.
 
+// deno-lint-ignore no-import-prefix
 import nodemailer from "npm:nodemailer@6.9.13";
 import { escaparHtml } from "./utils.ts";
 
