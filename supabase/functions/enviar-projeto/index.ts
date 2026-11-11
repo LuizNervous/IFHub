@@ -5,7 +5,7 @@
 //   3. rate limit por IP (no banco)  →  4. corpo com tamanho máximo
 //   5. anti-robô (honeypot + tempo)  →  6. validação estrita (Zod)
 //   7. imagem: valida, reconstrói e guarda no Storage (nome aleatório gerado AQUI)
-//   8. gravação atômica (função SQL; status fixo "pendente")  →  9. e-mail aos admins
+//   8. gravação atômica (função SQL; status fixo "pendente")  →  9. e-mail aos admins e ao aluno
 //   Se algo falhar depois do passo 7, a imagem é apagada (nada de lixo no Storage).
 
 import { createClient } from "@supabase/supabase-js";
@@ -240,9 +240,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     projetoCriado = true; // a partir daqui a imagem pertence a um projeto e NÃO deve ser apagada
 
-    // 9) Aviso aos admins. O projeto JÁ está salvo: se o e-mail falhar, o envio continua válido.
+    // 9) Aviso aos admins (e confirmação ao aluno). O projeto JÁ está salvo: se o e-mail falhar, o envio continua válido.
     try {
-      await notificarAdmins({
+      const resumoProjeto = {
         id: projetoId as number,
         titulo: projeto.titulo,
         turma: projeto.turma,
@@ -251,7 +251,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
         site_url: projeto.site_url,
         repo_url: projeto.repo_url,
         imagem_url: imagemUrl,
-      });
+        email_contato, // Passa também o e-mail do aluno que cadastrou o projeto
+      } as Parameters<typeof notificarAdmins>[0] & { email_contato?: string };
+
+      await notificarAdmins(resumoProjeto);
       await supabase
         .from("projeto_submissoes")
         .update({ admin_notificado_em: new Date().toISOString() })
