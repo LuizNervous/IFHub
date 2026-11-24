@@ -159,7 +159,7 @@ function ProjetoModal({ project, onClose, liked, onToggleLike }) {
             )}
             <div className="modal__like">
               <LikeButton
-                count={likes + (liked ? 1 : 0)}
+                count={likes}
                 liked={liked}
                 onToggle={onToggleLike}
                 subject={title}

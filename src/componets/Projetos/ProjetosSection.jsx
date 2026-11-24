@@ -1,7 +1,12 @@
 // ProjetosSection.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { listarProjetos, listarTurmas } from "../../services/projetosService";
+import {
+  alternarCurtida,
+  listarCurtidasVisitante,
+  listarProjetos,
+  listarTurmas,
+} from "../../services/projetosService";
 import FilterBar from "../ui/FilterBar";
 import AddSiteButton from "../ui/AddSiteButton";
 import ProjetoCard from "./ProjetoCard";
@@ -14,22 +19,28 @@ const ALL = "Todos";
 function ProjetosSection() {
   const [projects, setProjects] = useState([]);
   const [turmas, setTurmas] = useState([]);
+  const [likedIds, setLikedIds] = useState(() => new Set());
   const [status, setStatus] = useState("loading"); // "loading" | "error" | "ready"
   const [selectedTurma, setSelectedTurma] = useState(ALL);
+  const pendingLikesRef = useRef(new Set());
+  const usingFallbackRef = useRef(false);
 
   useEffect(() => {
     let cancelado = false;
 
     async function carregar() {
       try {
-        const [listaProjetos, listaTurmas] = await Promise.all([
+        const [listaProjetos, listaTurmas, curtidas] = await Promise.all([
           listarProjetos(),
           listarTurmas(),
+          listarCurtidasVisitante().catch(() => []),
         ]);
         if (cancelado) return;
 
         const temProjetosNoBanco = listaProjetos && listaProjetos.length > 0;
+        usingFallbackRef.current = !temProjetosNoBanco;
         setProjects(temProjetosNoBanco ? listaProjetos : fallbackProjects);
+        setLikedIds(new Set(curtidas));
 
         const temTurmasNoBanco = listaTurmas && listaTurmas.length > 0;
         setTurmas(temTurmasNoBanco ? listaTurmas : fallbackTurmas);
@@ -38,6 +49,7 @@ function ProjetosSection() {
       } catch (err) {
         console.warn("Erro ao buscar do banco, usando dados locais de teste:", err);
         if (!cancelado) {
+          usingFallbackRef.current = true;
           setProjects(fallbackProjects);
           setTurmas(fallbackTurmas);
           setStatus("ready");
@@ -50,6 +62,59 @@ function ProjetosSection() {
       cancelado = true;
     };
   }, []);
+
+  const handleToggleLike = async (projectId) => {
+    if (pendingLikesRef.current.has(projectId)) return;
+
+    const wasLiked = likedIds.has(projectId);
+    const nextLiked = !wasLiked;
+    const delta = nextLiked ? 1 : -1;
+
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      if (nextLiked) next.add(projectId);
+      else next.delete(projectId);
+      return next;
+    });
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, likes: Math.max(0, (p.likes ?? 0) + delta) } : p
+      )
+    );
+
+    if (usingFallbackRef.current) return;
+
+    pendingLikesRef.current.add(projectId);
+    try {
+      const resultado = await alternarCurtida(projectId);
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+        if (resultado.liked) next.add(projectId);
+        else next.delete(projectId);
+        return next;
+      });
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, likes: resultado.likes } : p
+        )
+      );
+    } catch (err) {
+      console.error("Erro ao curtir projeto:", err);
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) next.add(projectId);
+        else next.delete(projectId);
+        return next;
+      });
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, likes: Math.max(0, (p.likes ?? 0) - delta) } : p
+        )
+      );
+    } finally {
+      pendingLikesRef.current.delete(projectId);
+    }
+  };
 
   const handleSelectTurma = (novaTurma) => {
     if (novaTurma === selectedTurma) return;
@@ -134,7 +199,11 @@ function ProjetosSection() {
                     viewTransitionName: `project-item-${project.id}`,
                   }}
                 >
-                  <ProjetoCard project={project} />
+                  <ProjetoCard
+                    project={project}
+                    liked={likedIds.has(project.id)}
+                    onToggleLike={() => handleToggleLike(project.id)}
+                  />
                 </li>
               ))}
 

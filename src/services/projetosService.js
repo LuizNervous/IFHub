@@ -1,5 +1,23 @@
 import { supabase } from "../lib/supabase";
 
+const VISITOR_ID_KEY = "ifhub_visitor_id";
+
+function obterVisitanteId() {
+  try {
+    let id = localStorage.getItem(VISITOR_ID_KEY);
+    if (!id) {
+      id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem(VISITOR_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
 // Converte o formato do banco para o formato que seus componentes já usam
 function paraProjeto(row) {
   return {
@@ -12,7 +30,7 @@ function paraProjeto(row) {
     url: row.site_url,
     repoUrl: row.repo_url,
     advisor: row.orientador,
-    likes: 0, // curtidas ficam para depois
+    likes: row.likes ?? 0,
     tags: row.projeto_tecnologias.map((pt) => pt.tecnologias.nome),
     members: row.integrantes.map((i) => ({ name: i.nome, role: i.funcao })),
     highlights: row.destaques.map((d) => d.texto),
@@ -71,4 +89,31 @@ export async function listarTecnologias() {
 
   if (error) throw error;
   return data.map((t) => t.nome);
+}
+
+export async function listarCurtidasVisitante() {
+  const visitanteId = obterVisitanteId();
+  if (!visitanteId) return [];
+
+  const { data, error } = await supabase.rpc("listar_curtidas_visitante", {
+    p_visitante_id: visitanteId,
+  });
+
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+export async function alternarCurtida(projetoId) {
+  const visitanteId = obterVisitanteId();
+  if (!visitanteId) {
+    throw new Error("Não foi possível identificar o visitante para registrar a curtida.");
+  }
+
+  const { data, error } = await supabase.rpc("alternar_curtida", {
+    p_projeto_id: projetoId,
+    p_visitante_id: visitanteId,
+  });
+
+  if (error) throw error;
+  return data;
 }

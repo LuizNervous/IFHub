@@ -15,14 +15,13 @@ import "./ProjetoCard.css";
 const MAX_TAGS = 3;
 const MAX_AVATARS = 3;
 
-function ProjetoCard({ project }) {
+function ProjetoCard({ project, liked = false, onToggleLike }) {
   const {
     id, title, description, course, turma, image, url, repoUrl,
     tags = [], members = [], likes = 0,
   } = project;
 
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [liked, setLiked] = useState(false); // Estado unificado de like
   const cardRef = useSpotlight();
 
   const hasSite = url && isSafeUrl(url);
@@ -84,7 +83,7 @@ function ProjetoCard({ project }) {
   };
 
   const handleToggleLike = () => {
-    setLiked((prev) => !prev);
+    onToggleLike?.();
   };
 
   return (
@@ -192,9 +191,9 @@ function ProjetoCard({ project }) {
               )}
 
               <LikeButton
-                count={likes + (liked ? 1 : 0)}
+                count={likes}
                 liked={liked}
-                onToggle={handleToggleLike}
+                onToggle={onToggleLike ? handleToggleLike : undefined}
                 subject={title}
               />
             </div>
